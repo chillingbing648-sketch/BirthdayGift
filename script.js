@@ -8,7 +8,7 @@ const $$ = s => [...document.querySelectorAll(s)];
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const LOW = (navigator.hardwareConcurrency || 4) <= 4;
 const MAX_LINK_LEN = 100000;
-const DRAFT_KEY = 'birthday_gift_draft_v2';
+const DRAFT_KEY = 'birthday_gift_draft_v3';
 
 // Application State
 const st = {
@@ -42,6 +42,17 @@ const fmtDate = d => {
 /* ==============================================================
    LOCALSTORAGE DRAFT PERSISTENCE
    ============================================================== */
+function getFormNotes() {
+  const notes = [];
+  for (let i = 1; i <= 5; i++) {
+    const el = $(`#f-note-${i}`);
+    if (el && el.value.trim()) {
+      notes.push(el.value.trim().slice(0, 90));
+    }
+  }
+  return notes;
+}
+
 function saveDraft() {
   if (st.mode !== 'build') return;
   try {
@@ -51,7 +62,7 @@ function saveDraft() {
       age: $('#f-age').value,
       date: $('#f-date').value,
       tone: st.tone,
-      notes: $('#f-notes').value,
+      notes: [1, 2, 3, 4, 5].map(i => $(`#f-note-${i}`)?.value || ''),
       letter: $('#f-letter').value,
       greeting: $('#f-greeting').value,
       signoff: $('#f-signoff').value,
@@ -75,7 +86,14 @@ function loadDraft() {
     if (draft.from) $('#f-from').value = draft.from;
     if (draft.age) $('#f-age').value = draft.age;
     if (draft.date) $('#f-date').value = draft.date;
-    if (draft.notes) $('#f-notes').value = draft.notes;
+
+    if (Array.isArray(draft.notes)) {
+      draft.notes.forEach((txt, idx) => {
+        const el = $(`#f-note-${idx + 1}`);
+        if (el) el.value = txt || '';
+      });
+    }
+
     if (draft.letter) $('#f-letter').value = draft.letter;
     if (draft.greeting) $('#f-greeting').value = draft.greeting;
     if (draft.signoff) $('#f-signoff').value = draft.signoff;
@@ -113,7 +131,10 @@ function clearDraft() {
     $('#f-from').value = '';
     $('#f-age').value = '';
     $('#f-date').value = '';
-    $('#f-notes').value = '';
+    for (let i = 1; i <= 5; i++) {
+      const el = $(`#f-note-${i}`);
+      if (el) el.value = '';
+    }
     $('#f-letter').value = '';
     $('#f-greeting').value = 'Dear Maya,';
     $('#f-signoff').value = 'With all my love,';
@@ -162,7 +183,7 @@ function clean(d) {
   const validTheme = ['violet', 'rose', 'ocean', 'amber'].includes(d.theme) ? d.theme : 'violet';
 
   const notes = (Array.isArray(d.notes) ? d.notes : [])
-    .slice(0, 6)
+    .slice(0, 5)
     .map(n => str(n, 90))
     .filter(Boolean);
 
@@ -193,7 +214,7 @@ function clean(d) {
 }
 
 function readForm() {
-  const notesText = $('#f-notes').value.split('\n').map(n => n.trim()).filter(Boolean);
+  const notes = getFormNotes();
   return clean({
     v: 1,
     to: $('#f-to').value,
@@ -204,7 +225,7 @@ function readForm() {
     cd: $('#f-cd').checked ? 1 : 0,
     greeting: $('#f-greeting').value,
     signoff: $('#f-signoff').value,
-    notes: notesText,
+    notes,
     letter: $('#f-letter').value,
     photos: st.photos.map(p => ({ s: p.s, c: p.c }))
   });
@@ -230,12 +251,12 @@ function toast(text) {
   el.textContent = text;
   el.classList.add('on');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('on'), 2800);
+  toastTimer = setTimeout(() => el.classList.remove('on'), 2600);
 }
 
 function setFormMsg(text) {
   const el = $('#formMsg');
-  el.textContent = text ? `⚠️ ${text}` : '';
+  el.textContent = text ? text : '';
 }
 
 function flashBloom() {
@@ -243,7 +264,7 @@ function flashBloom() {
   b.classList.remove('bloom');
   void b.offsetWidth;
   b.classList.add('bloom');
-  setTimeout(() => b.classList.remove('bloom'), 1600);
+  setTimeout(() => b.classList.remove('bloom'), 1000);
 }
 
 function showStage(id) {
@@ -321,7 +342,7 @@ const AudioEngine = {
       if (!AudioCtx) return null;
       this.ctx = new AudioCtx();
       this.master = this.ctx.createGain();
-      this.master.gain.value = this.muted ? 0 : 0.75;
+      this.master.gain.value = this.muted ? 0 : 0.7;
       this.master.connect(this.ctx.destination);
     }
     if (this.ctx.state === 'suspended') {
@@ -330,7 +351,7 @@ const AudioEngine = {
     return this.ctx;
   },
 
-  playTone(freq, time, duration, type = 'sine', vol = 0.14, freqEnd = null) {
+  playTone(freq, time, duration, type = 'sine', vol = 0.12, freqEnd = null) {
     const c = this.getCtx();
     if (!c) return;
     const osc = c.createOscillator();
@@ -357,17 +378,16 @@ const AudioEngine = {
       const c = AudioEngine.getCtx();
       if (!c) return;
       const t = c.currentTime;
-      AudioEngine.playTone(320, t, 0.25, 'triangle', 0.12, 640);
-      AudioEngine.playTone(784, t + 0.1, 0.4, 'sine', 0.15);
-      AudioEngine.playTone(1046, t + 0.18, 0.6, 'sine', 0.18);
+      AudioEngine.playTone(320, t, 0.2, 'triangle', 0.1, 640);
+      AudioEngine.playTone(784, t + 0.08, 0.35, 'sine', 0.12);
     },
 
     openGift() {
       const c = AudioEngine.getCtx();
       if (!c) return;
       const t = c.currentTime;
-      [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => {
-        AudioEngine.playTone(f, t + i * 0.07, 1.2, 'sine', 0.16);
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+        AudioEngine.playTone(f, t + i * 0.08, 1.0, 'sine', 0.14);
       });
     },
 
@@ -375,15 +395,15 @@ const AudioEngine = {
       const c = AudioEngine.getCtx();
       if (!c) return;
       const t = c.currentTime;
-      AudioEngine.playTone(580, t, 0.12, 'sine', 0.35, 90);
-      AudioEngine.playTone(880, t + 0.04, 0.3, 'triangle', 0.1);
+      AudioEngine.playTone(560, t, 0.1, 'sine', 0.3, 80);
+      AudioEngine.playTone(880, t + 0.03, 0.25, 'triangle', 0.08);
     },
 
     blow() {
       const c = AudioEngine.getCtx();
       if (!c) return;
       const t = c.currentTime;
-      const bufLen = Math.floor(c.sampleRate * 0.45);
+      const bufLen = Math.floor(c.sampleRate * 0.35);
       const buf = c.createBuffer(1, bufLen, c.sampleRate);
       const data = buf.getChannelData(0);
       for (let i = 0; i < bufLen; i++) {
@@ -394,11 +414,11 @@ const AudioEngine = {
       const gain = c.createGain();
 
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1100, t);
-      filter.frequency.exponentialRampToValueAtTime(180, t + 0.4);
+      filter.frequency.setValueAtTime(1000, t);
+      filter.frequency.exponentialRampToValueAtTime(160, t + 0.35);
 
-      gain.gain.setValueAtTime(0.3, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+      gain.gain.setValueAtTime(0.25, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
 
       src.buffer = buf;
       src.connect(filter);
@@ -411,32 +431,29 @@ const AudioEngine = {
       const c = AudioEngine.getCtx();
       if (!c) return;
       const t = c.currentTime;
-      AudioEngine.playTone(420, t, 0.08, 'square', 0.08, 120);
-      AudioEngine.playTone(650, t + 0.06, 0.35, 'triangle', 0.14);
-      AudioEngine.playTone(980, t + 0.14, 0.5, 'sine', 0.12);
+      AudioEngine.playTone(400, t, 0.08, 'square', 0.06, 120);
+      AudioEngine.playTone(680, t + 0.05, 0.3, 'sine', 0.12);
     },
 
     party() {
       const c = AudioEngine.getCtx();
       if (!c) return;
       const t = c.currentTime;
-      const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+      const notes = [523.25, 659.25, 783.99, 1046.5];
       notes.forEach((f, i) => {
-        AudioEngine.playTone(f, t + i * 0.08, 0.8, 'triangle', 0.16);
+        AudioEngine.playTone(f, t + i * 0.08, 0.7, 'triangle', 0.14);
       });
-      AudioEngine.playTone(261.63, t, 1.5, 'sine', 0.2);
     },
 
     cut() {
       const c = AudioEngine.getCtx();
       if (!c) return;
       const t = c.currentTime;
-      AudioEngine.playTone(850, t, 0.18, 'triangle', 0.16, 320);
-      AudioEngine.playTone(523, t + 0.15, 0.5, 'sine', 0.14);
+      AudioEngine.playTone(800, t, 0.15, 'triangle', 0.14, 300);
+      AudioEngine.playTone(523, t + 0.12, 0.45, 'sine', 0.12);
     }
   },
 
-  // Soothing, gentle birthday music box arpeggios
   chords: [
     [261.63, 329.63, 392.00, 523.25], // C major
     [220.00, 261.63, 329.63, 440.00], // A minor
@@ -451,10 +468,9 @@ const AudioEngine = {
     const chord = AudioEngine.chords[AudioEngine.chordIndex++ % AudioEngine.chords.length];
 
     [0, 1, 2, 3, 2, 1, 2, 1].forEach((k, i) => {
-      AudioEngine.playTone(chord[k], t + i * 0.32, 1.3, 'triangle', 0.045);
+      AudioEngine.playTone(chord[k], t + i * 0.32, 1.2, 'triangle', 0.04);
     });
-    // Deep warm bass note
-    AudioEngine.playTone(chord[0] / 2, t, 2.4, 'sine', 0.07);
+    AudioEngine.playTone(chord[0] / 2, t, 2.2, 'sine', 0.06);
   },
 
   updateUI() {
@@ -462,14 +478,14 @@ const AudioEngine = {
     const btnMute = $('#btnMute');
     if (btnM) {
       btnM.innerHTML = AudioEngine.playing
-        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg><span>Pause</span>`
-        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Music</span>`;
+        ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg><span>Pause</span>`
+        : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Music</span>`;
       btnM.setAttribute('aria-pressed', AudioEngine.playing);
     }
     if (btnMute) {
       btnMute.innerHTML = AudioEngine.muted
-        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg><span>Unmute</span>`
-        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg><span>Mute</span>`;
+        ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg><span>Unmute</span>`
+        : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg><span>Mute</span>`;
       btnMute.setAttribute('aria-pressed', AudioEngine.muted);
     }
   },
@@ -509,7 +525,7 @@ const AudioEngine = {
 
   toggleMute() {
     this.muted = !this.muted;
-    if (this.master) this.master.gain.value = this.muted ? 0 : 0.75;
+    if (this.master) this.master.gain.value = this.muted ? 0 : 0.7;
     if (this.customAudio) this.customAudio.muted = this.muted;
     this.updateUI();
   }
@@ -527,7 +543,7 @@ $('#f-music').onchange = e => {
 
   if (!file) return;
   if (!file.type.startsWith('audio/')) {
-    setFormMsg('Please choose a valid audio file (MP3, WAV, M4A, etc.).');
+    setFormMsg('Please choose a valid audio file (MP3, WAV, etc.).');
     e.target.value = '';
     return;
   }
@@ -557,17 +573,16 @@ const VideoPlayer = {
     if (!this.canvas) return;
     this.ctx = this.canvas.getContext('2d');
 
-    // Create motion particles
     this.particles = [];
-    for (let i = 0; i < 70; i++) {
+    for (let i = 0; i < 50; i++) {
       this.particles.push({
         x: Math.random() * this.canvas.width,
         y: Math.random() * this.canvas.height,
-        r: Math.random() * 3 + 1,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: -Math.random() * 0.8 - 0.2,
-        alpha: Math.random() * 0.7 + 0.3,
-        hue: Math.random() > 0.5 ? 42 : 335 // Gold or Rose
+        r: Math.random() * 2.5 + 1,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: -Math.random() * 0.6 - 0.15,
+        alpha: Math.random() * 0.6 + 0.3,
+        hue: Math.random() > 0.5 ? 42 : 335
       });
     }
 
@@ -653,7 +668,7 @@ const VideoPlayer = {
 
     this.currentTime += dt;
     if (this.currentTime >= this.duration) {
-      this.currentTime = 0; // Loop film
+      this.currentTime = 0;
     }
 
     this.updateTimeDisplay();
@@ -676,15 +691,10 @@ const VideoPlayer = {
     const h = this.canvas.height;
     const toName = (st.data && st.data.to) ? st.data.to : 'Someone Special';
 
-    // Cinematic deep cosmic background
-    const bgGrad = c.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, w * 0.7);
-    bgGrad.addColorStop(0, '#2d1842');
-    bgGrad.addColorStop(0.6, '#150a22');
-    bgGrad.addColorStop(1, '#08040d');
-    c.fillStyle = bgGrad;
+    c.fillStyle = '#0f0a17';
     c.fillRect(0, 0, w, h);
 
-    // Drifting gold/rose particle field
+    // Drifting particles
     for (const p of this.particles) {
       p.x += p.vx;
       p.y += p.vy;
@@ -696,29 +706,27 @@ const VideoPlayer = {
       c.save();
       c.beginPath();
       c.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      c.fillStyle = `hsla(${p.hue}, 85%, 70%, ${p.alpha})`;
-      c.shadowColor = '#f4c978';
-      c.shadowBlur = p.r * 3;
+      c.fillStyle = `hsla(${p.hue}, 80%, 70%, ${p.alpha})`;
       c.fill();
       c.restore();
     }
 
-    // Rotating 3D Golden Ribbon Ring
-    const angle = time * 0.8;
+    // Concentric clean orbit lines
+    const angle = time * 0.6;
     c.save();
     c.translate(w / 2, h / 2);
-    c.rotate(angle * 0.2);
+    c.rotate(angle * 0.15);
 
-    for (let r = 140; r <= 180; r += 20) {
+    for (let r = 130; r <= 170; r += 20) {
       c.beginPath();
       c.ellipse(0, 0, r * 1.5, r * 0.5, angle, 0, Math.PI * 2);
-      c.strokeStyle = 'rgba(244, 201, 120, 0.25)';
-      c.lineWidth = 1.5;
+      c.strokeStyle = 'rgba(232, 191, 114, 0.18)';
+      c.lineWidth = 1;
       c.stroke();
     }
     c.restore();
 
-    // Central Cinematic Title Cards based on timeline phase
+    // Central Cinematic Title Cards
     c.save();
     c.textAlign = 'center';
     c.textBaseline = 'middle';
@@ -728,7 +736,7 @@ const VideoPlayer = {
 
     if (time >= 22 && time < 45) {
       titleText = 'Your Kindness & Laughter';
-      subText = 'Make the World Brighter for Everyone Lucky Enough to Know You';
+      subText = 'Make the World Brighter for Everyone Around You';
     } else if (time >= 45 && time < 68) {
       titleText = 'May All Your Dreams Take Flight';
       subText = 'Here’s to Boundless Love, Health, and Adventure';
@@ -737,25 +745,13 @@ const VideoPlayer = {
       subText = `With Every Wish From the Heart • ${(st.data && st.data.from) ? st.data.from : ''}`;
     }
 
-    // Title shadow and glow
-    c.font = '500 42px "Iowan Old Style", Georgia, serif';
-    c.fillStyle = '#fffdf7';
-    c.shadowColor = '#f4c978';
-    c.shadowBlur = 24;
-    c.fillText(titleText, w / 2, h / 2 - 16);
+    c.font = '500 38px "Playfair Display", Georgia, serif';
+    c.fillStyle = '#f7f4fb';
+    c.fillText(titleText, w / 2, h / 2 - 14);
 
-    // Subtitle
-    c.font = 'italic 20px "Iowan Old Style", Georgia, serif';
-    c.fillStyle = '#f4c978';
-    c.shadowBlur = 10;
-    c.fillText(subText, w / 2, h / 2 + 32);
-
-    // Cinematic vignette border
-    const vig = c.createRadialGradient(w / 2, h / 2, h * 0.45, w / 2, h / 2, w * 0.65);
-    vig.addColorStop(0, 'rgba(0,0,0,0)');
-    vig.addColorStop(1, 'rgba(0,0,0,0.7)');
-    c.fillStyle = vig;
-    c.fillRect(0, 0, w, h);
+    c.font = 'italic 18px "Playfair Display", Georgia, serif';
+    c.fillStyle = '#e8bf72';
+    c.fillText(subText, w / 2, h / 2 + 28);
 
     c.restore();
   }
@@ -846,7 +842,6 @@ const PhotoViewer = {
     const cap = $('#pvCaption');
     const fig = $('#pvFigure');
 
-    // Trigger scale-in entrance animation
     fig.classList.remove('scale-in');
     void fig.offsetWidth;
     fig.classList.add('scale-in');
@@ -872,14 +867,12 @@ const PhotoViewer = {
     $('#pvZoomOut').onclick = () => this.zoomOut();
     $('#pvZoomReset').onclick = () => this.resetZoom();
 
-    // Close on backdrop click
     pv.onclick = e => {
       if (e.target === pv || e.target === $('#pvFigure') || e.target === $('#pvImgWrap')) {
         this.close();
       }
     };
 
-    // Keyboard navigation (Escape, ArrowLeft, ArrowRight)
     window.addEventListener('keydown', e => {
       if (!this.active) return;
       if (e.key === 'Escape') this.close();
@@ -887,7 +880,6 @@ const PhotoViewer = {
       if (e.key === 'ArrowLeft') this.prev();
     });
 
-    // Touch Swipe gestures (delta > 50px)
     pv.addEventListener('touchstart', e => {
       this.touchStartX = e.touches[0].clientX;
     }, { passive: true });
@@ -901,7 +893,6 @@ const PhotoViewer = {
       this.touchStartX = null;
     });
 
-    // Pan drag when zoomed in
     const imgWrap = $('#pvImgWrap');
     imgWrap.addEventListener('mousedown', e => {
       if (this.zoom <= 1) return;
@@ -1111,18 +1102,17 @@ function updateLivePreview() {
   const fromVal = $('#f-from').value.trim() || 'You';
   $('#prevFor').textContent = `For ${toVal}, from ${fromVal}`;
 
-  const notesCount = $('#f-notes').value.split('\n').filter(n => n.trim()).length;
+  const notes = getFormNotes();
   const photoCount = st.photos.length;
   const hasLetter = $('#f-letter').value.trim().length > 0;
 
   const statParts = [];
-  if (photoCount) statParts.push(`📸 ${photoCount} ${photoCount === 1 ? 'photo' : 'photos'}`);
-  if (notesCount) statParts.push(`🎈 ${notesCount} ${notesCount === 1 ? 'note' : 'notes'}`);
-  if (hasLetter) statParts.push('💌 Sealed letter');
+  if (photoCount) statParts.push(`${photoCount} ${photoCount === 1 ? 'photo' : 'photos'}`);
+  if (notes.length) statParts.push(`${notes.length} ${notes.length === 1 ? 'note' : 'notes'}`);
+  if (hasLetter) statParts.push('Letter');
 
-  $('#prevStats').textContent = statParts.length ? statParts.join(' • ') : '✨ Ready to personalize';
+  $('#prevStats').textContent = statParts.length ? statParts.join(' • ') : 'Ready to personalize';
 
-  // Calculate payload size
   try {
     const raw = readForm();
     const encoded = enc(raw);
@@ -1131,7 +1121,6 @@ function updateLivePreview() {
     const pct = Math.min(100, Math.max(5, (estBytes / MAX_LINK_LEN) * 100));
 
     $('#meterFill').style.width = `${pct}%`;
-    $('#meterFill').style.backgroundColor = pct > 85 ? '#ff5252' : pct > 60 ? '#f4c978' : 'var(--a1)';
     $('#meterText').textContent = `${estKb} KB / 100 KB`;
   } catch {
     $('#meterFill').style.width = '10%';
@@ -1185,12 +1174,12 @@ function validateCurrentStep() {
     const to = $('#f-to').value.trim();
     const from = $('#f-from').value.trim();
     if (!to) {
-      setFormMsg('Please enter their name so they feel celebrated.');
+      setFormMsg('Please enter their name.');
       $('#f-to').focus();
       return false;
     }
     if (!from) {
-      setFormMsg('Please enter your name so they know who made this.');
+      setFormMsg('Please enter your name.');
       $('#f-from').focus();
       return false;
     }
@@ -1237,7 +1226,7 @@ $('#f-letter').oninput = e => {
 };
 
 // Inputs live update and draft save
-['#f-to', '#f-from', '#f-age', '#f-date', '#f-notes', '#f-greeting', '#f-signoff'].forEach(sel => {
+['#f-to', '#f-from', '#f-age', '#f-date', '#f-greeting', '#f-signoff'].forEach(sel => {
   const el = $(sel);
   if (el) {
     el.addEventListener('input', () => {
@@ -1246,6 +1235,16 @@ $('#f-letter').oninput = e => {
     });
   }
 });
+
+for (let i = 1; i <= 5; i++) {
+  const el = $(`#f-note-${i}`);
+  if (el) {
+    el.addEventListener('input', () => {
+      updateLivePreview();
+      saveDraft();
+    });
+  }
+}
 
 $('#f-cd').onchange = saveDraft;
 
@@ -1284,7 +1283,6 @@ $$('#toneChips .chip').forEach(chip => {
     st.tone = chip.dataset.tone;
     saveDraft();
 
-    // Update inspiration prompt chips
     const prompts = tonePrompts[st.tone] || tonePrompts.warm;
     const container = $('#promptChips');
     container.textContent = '';
@@ -1293,19 +1291,22 @@ $$('#toneChips .chip').forEach(chip => {
       btn.type = 'button';
       btn.className = 'chip prompt-chip';
       btn.dataset.prompt = p;
-      btn.textContent = `✨ "${p.slice(0, 32)}..."`;
+      btn.textContent = `"${p.slice(0, 32)}..."`;
       btn.onclick = () => {
-        const area = $('#f-notes');
-        const lines = area.value.split('\n').filter(Boolean);
-        if (lines.length < 6) {
-          lines.push(p);
-          area.value = lines.join('\n');
-          toast('Note added to balloons! 🎈');
-          updateLivePreview();
-          saveDraft();
-        } else {
-          toast('You can have up to 6 balloon notes.');
+        // Find first empty note field among 1..5
+        let filled = false;
+        for (let i = 1; i <= 5; i++) {
+          const el = $(`#f-note-${i}`);
+          if (el && !el.value.trim()) {
+            el.value = p;
+            toast(`Note ${i} added! 🎈`);
+            updateLivePreview();
+            saveDraft();
+            filled = true;
+            break;
+          }
         }
+        if (!filled) toast('All 5 balloon notes are filled.');
       };
       container.append(btn);
     });
@@ -1316,17 +1317,19 @@ $$('#toneChips .chip').forEach(chip => {
 $$('.prompt-chip').forEach(btn => {
   btn.onclick = () => {
     const p = btn.dataset.prompt;
-    const area = $('#f-notes');
-    const lines = area.value.split('\n').filter(Boolean);
-    if (lines.length < 6) {
-      lines.push(p);
-      area.value = lines.join('\n');
-      toast('Note added to balloons! 🎈');
-      updateLivePreview();
-      saveDraft();
-    } else {
-      toast('You can have up to 6 balloon notes.');
+    let filled = false;
+    for (let i = 1; i <= 5; i++) {
+      const el = $(`#f-note-${i}`);
+      if (el && !el.value.trim()) {
+        el.value = p;
+        toast(`Note ${i} added! 🎈`);
+        updateLivePreview();
+        saveDraft();
+        filled = true;
+        break;
+      }
     }
+    if (!filled) toast('All 5 balloon notes are filled.');
   };
 });
 
@@ -1393,7 +1396,7 @@ $('#modalBtnPreview').onclick = () => {
 };
 
 /* ==============================================================
-   PARTICLE CANVAS (Confetti & Stardust)
+   PARTICLE CANVAS (Confetti)
    ============================================================== */
 const canvas = $('#fx');
 const ctx = canvas.getContext('2d');
@@ -1410,17 +1413,17 @@ window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 function launchConfetti() {
-  const count = RM ? 20 : LOW ? 65 : 120;
-  const colors = ['#f4c978', '#ff7eb6', '#8b6cff', '#fff1c7', '#5aa7ff', '#7ef0d4'];
+  const count = RM ? 20 : LOW ? 50 : 90;
+  const colors = ['#e8bf72', '#ff8fb1', '#8b6cff', '#fff5de', '#5aa7ff'];
   for (let i = 0; i < count; i++) {
     particles.push({
-      x: window.innerWidth / 2 + (Math.random() - 0.5) * window.innerWidth * 0.4,
+      x: window.innerWidth / 2 + (Math.random() - 0.5) * window.innerWidth * 0.35,
       y: window.innerHeight * 0.45,
-      vx: (Math.random() - 0.5) * 16,
-      vy: -Math.random() * 16 - 5,
-      r: Math.random() * 5 + 3,
+      vx: (Math.random() - 0.5) * 14,
+      vy: -Math.random() * 14 - 4,
+      r: Math.random() * 4 + 2.5,
       a: Math.random() * Math.PI * 2,
-      va: (Math.random() - 0.5) * 0.35,
+      va: (Math.random() - 0.5) * 0.3,
       c: colors[i % colors.length]
     });
   }
@@ -1429,10 +1432,10 @@ function launchConfetti() {
 
 function renderParticles() {
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-  particles = particles.filter(p => p.y < window.innerHeight + 25);
+  particles = particles.filter(p => p.y < window.innerHeight + 20);
 
   for (const p of particles) {
-    p.vy += 0.38;
+    p.vy += 0.36;
     p.vx *= 0.99;
     p.x += p.vx;
     p.y += p.vy;
@@ -1459,20 +1462,18 @@ function gotoScene(index) {
   st.i = index;
   const stageName = st.stages[index];
 
-  // Update progress bar
   const pct = (index / Math.max(st.stages.length - 1, 1)) * 100;
   $('#progFill').style.width = `${pct}%`;
 
-  // Update badge
   const badgeMap = {
     intro: 'The Gift Box',
-    count: 'Anticipation',
-    video: 'Cinematic Film',
+    count: 'Countdown',
+    video: 'Birthday Film',
     cake: 'Make a Wish',
     balloons: 'Whispered Wishes',
-    gallery: 'Memory Album',
+    gallery: 'Memories',
     letter: 'A Sealed Letter',
-    final: 'Grand Finale'
+    final: 'Celebration'
   };
   $('#stageBadge').textContent = badgeMap[stageName] || 'Birthday Gift';
 
@@ -1488,21 +1489,16 @@ function beginExperience() {
   const d = st.data;
   document.body.dataset.theme = d.theme;
 
-  // Build stage sequence dynamically
   st.stages = [];
 
-  // Countdown stage (if enabled and date is ahead)
   const isFutureDate = d.cd && d.date && new Date(d.date + 'T00:00:00').getTime() > Date.now();
   if (isFutureDate) {
     st.stages.push('count');
   }
 
-  // Cinematic Video Player Scene
   st.stages.push('video');
-
-  // Core celebratory stages
   st.stages.push('cake');
-  st.stages.push('balloons'); // Always includes balloon bouquets & notes
+  st.stages.push('balloons');
   if (d.photos && d.photos.length) st.stages.push('gallery');
   if (d.letter) st.stages.push('letter');
   st.stages.push('final');
@@ -1524,12 +1520,12 @@ function returnToWorkshop() {
   showStage('build');
 }
 
-/* Scene 1: Intro (The 3D Wrapped Gift) */
+/* Scene 1: Intro (The Wrapped Gift) */
 function initIntroScene() {
   const d = st.data;
   words($('#introH'), `${d.from} made a birthday surprise for ${d.to}`);
   $('#tagTo').textContent = `For ${d.to}`;
-  $('#tagFrom').textContent = `With love, ${d.from}`;
+  $('#tagFrom').textContent = `From ${d.from}`;
 
   const giftBox = $('#giftBox');
   giftBox.classList.remove('unwrapping');
@@ -1541,8 +1537,8 @@ function initIntroScene() {
       AudioEngine.sfx.openGift();
       flashBloom();
       launchConfetti();
-      setTimeout(beginExperience, 600);
-    }, 700);
+      setTimeout(beginExperience, 500);
+    }, 600);
   };
 
   giftBox.onclick = triggerUnwrap;
@@ -1609,14 +1605,14 @@ SceneHandlers.cake = () => {
     g.setAttribute('aria-label', `Blow out candle ${i + 1}`);
 
     g.innerHTML = `
-      <circle class="gl" cx="${x}" cy="60" r="24"/>
-      <rect x="${x - 4}" y="74" width="8" height="34" rx="2" fill="#fcf2dc"/>
+      <circle class="gl" cx="${x}" cy="60" r="22"/>
+      <rect x="${x - 4}" y="74" width="8" height="34" rx="2" fill="#edd8b1"/>
       <path class="fl" d="M${x} 48 c7 8 7 15 0 22 c-7 -7 -7 -14 0 -22 z"/>
     `;
     container.append(g);
   }
 
-  st.ck = 0; // 0 = unblown, 1 = blown out (make wish), 2 = wish made (cut cake)
+  st.ck = 0;
   words($('#cakeH'), `${d.to}, it’s your moment`);
   $('#cakeP').textContent = 'Tap each glowing flame, or blow them all out together.';
   $('#cakeBtn').textContent = 'Blow out the candles';
@@ -1654,9 +1650,8 @@ $('#candles').onkeydown = e => {
 
 $('#cakeBtn').onclick = () => {
   if (st.ck === 0) {
-    // Extinguish all candles in cascade
     $$('#candles .candle').forEach((c, idx) => {
-      setTimeout(() => extinguishCandle(c), idx * 160);
+      setTimeout(() => extinguishCandle(c), idx * 150);
     });
   } else if (st.ck === 1) {
     st.ck = 2;
@@ -1696,7 +1691,7 @@ SceneHandlers.balloons = () => {
     btn.className = 'bl';
 
     const xPos = notes.length === 1 ? 50 : 12 + idx * (76 / (notes.length - 1));
-    const yOffset = ['0px', '55px', '22px', '45px'][idx % 4];
+    const yOffset = ['0px', '50px', '20px', '40px'][idx % 4];
     const hues = [345, 330, 38, 265, 355, 290];
 
     btn.style.setProperty('--x', `${xPos}%`);
@@ -1728,7 +1723,7 @@ SceneHandlers.balloons = () => {
 };
 $('#balBtn').onclick = nextScene;
 
-/* Scene 6: Memory Photo Gallery (with PhotoViewer Integration) */
+/* Scene 6: Memory Photo Gallery */
 SceneHandlers.gallery = () => {
   const slides = $('#slides');
   slides.textContent = '';
@@ -1743,7 +1738,7 @@ SceneHandlers.gallery = () => {
 
     const hint = document.createElement('span');
     hint.className = 'slide-view-hint';
-    hint.textContent = '🔍 View full';
+    hint.textContent = 'View full';
 
     const img = new Image();
     img.src = photo.s;
@@ -1850,8 +1845,8 @@ function revealLetter() {
       if (charIdx >= fullText.length) {
         finishTyping();
       }
-    }, 28);
-  }, RM ? 0 : 800);
+    }, 25);
+  }, RM ? 0 : 650);
 }
 
 $('#openLet').onclick = revealLetter;
@@ -1864,7 +1859,7 @@ $('#env').onkeydown = e => {
 };
 $('#letBtn').onclick = nextScene;
 
-/* Scene 8: Grand Finale Celebration */
+/* Scene 8: Grand Finale */
 SceneHandlers.final = () => {
   const d = st.data;
   const ageStr = d.age ? `${d.age}` : '';
@@ -1889,7 +1884,6 @@ SceneHandlers.final = () => {
   flashBloom();
   AudioEngine.sfx.party();
   launchConfetti();
-  setTimeout(launchConfetti, 1200);
 };
 
 function getCurrentGiftLink() {
@@ -1930,11 +1924,9 @@ function initApp() {
   VideoPlayer.init();
   PhotoViewer.init();
 
-  // Check hash format (#draft=... or legacy)
   const match = /^#draft=([\w-]+)$/.exec(location.hash);
 
   if (!match) {
-    // Creator Workshop mode
     st.mode = 'build';
     showStage('build');
     loadDraft();
@@ -1943,7 +1935,6 @@ function initApp() {
     return;
   }
 
-  // Recipient mode
   try {
     if (match[1].length > MAX_LINK_LEN) {
       throw bad('This link is longer than the application accepts.');
@@ -1965,25 +1956,4 @@ function initApp() {
 
 window.addEventListener('hashchange', () => location.reload());
 
-// Ambient stardust generator
-if (!RM) {
-  const dustContainer = $('#dust');
-  if (dustContainer) {
-    const starCount = LOW ? 5 : 12;
-    for (let i = 0; i < starCount; i++) {
-      const star = document.createElement('span');
-      const size = 2 + Math.random() * 3.5;
-      star.style.cssText = `
-        left: ${Math.random() * 100}%;
-        width: ${size}px;
-        height: ${size}px;
-        animation-duration: ${14 + Math.random() * 16}s;
-        animation-delay: ${-Math.random() * 20}s;
-      `;
-      dustContainer.append(star);
-    }
-  }
-}
-
-// Start application
 initApp();
