@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0d0a14">
 <title>A Personalized Birthday Surprise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body data-theme="violet">
@@ -50,24 +53,24 @@
     </div>
 
     <!-- Step Navigation Pills -->
-    <nav class="step-nav" aria-label="Gift creation stages">
-      <button type="button" class="step-tab active" data-step="1">
+    <nav class="step-nav" role="tablist" aria-label="Gift creation stages">
+      <button type="button" class="step-tab active" role="tab" id="tab-1" aria-selected="true" aria-controls="pane-1" data-step="1">
         <span class="step-num">1</span>
         <span>Details</span>
       </button>
-      <button type="button" class="step-tab" data-step="2">
+      <button type="button" class="step-tab" role="tab" id="tab-2" aria-selected="false" aria-controls="pane-2" data-step="2">
         <span class="step-num">2</span>
         <span>Theme & Cake</span>
       </button>
-      <button type="button" class="step-tab" data-step="3">
+      <button type="button" class="step-tab" role="tab" id="tab-3" aria-selected="false" aria-controls="pane-3" data-step="3">
         <span class="step-num">3</span>
         <span>Balloon Notes</span>
       </button>
-      <button type="button" class="step-tab" data-step="4">
+      <button type="button" class="step-tab" role="tab" id="tab-4" aria-selected="false" aria-controls="pane-4" data-step="4">
         <span class="step-num">4</span>
         <span>Photos</span>
       </button>
-      <button type="button" class="step-tab" data-step="5">
+      <button type="button" class="step-tab" role="tab" id="tab-5" aria-selected="false" aria-controls="pane-5" data-step="5">
         <span class="step-num">5</span>
         <span>Letter</span>
       </button>
@@ -78,7 +81,10 @@
       <div class="live-preview-box">
         <div class="mini-box-icon" aria-hidden="true">🎁</div>
         <div class="mini-box-details">
-          <span class="mini-box-for" id="prevFor">For Maya, from Sam</span>
+          <div class="row mid" style="gap: 6px; justify-content: flex-start;">
+            <span class="mini-theme-dot" id="prevThemeDot" title="Selected theme"></span>
+            <span class="mini-box-for" id="prevFor">For Maya, from Sam</span>
+          </div>
           <span class="mini-box-stats" id="prevStats">Ready to personalize</span>
         </div>
       </div>
@@ -94,7 +100,7 @@
     <form id="form" class="workshop-card" novalidate>
       
       <!-- STEP 1: Details -->
-      <div class="workshop-pane active" data-step="1">
+      <div class="workshop-pane active" role="tabpanel" id="pane-1" aria-labelledby="tab-1" data-step="1">
         <div class="pane-intro">
           <h2>Who are you celebrating?</h2>
           <p>Enter their name and birthday details to begin.</p>
@@ -103,11 +109,11 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="f-to">Their name <small>Required</small></label>
-            <input id="f-to" maxlength="40" autocomplete="off" placeholder="e.g. Maya" required>
+            <input id="f-to" maxlength="40" autocomplete="given-name" autocapitalize="words" spellcheck="false" placeholder="e.g. Maya" required aria-required="true">
           </div>
           <div class="form-group">
             <label for="f-from">Your name <small>Required</small></label>
-            <input id="f-from" maxlength="40" autocomplete="off" placeholder="e.g. Sam" required>
+            <input id="f-from" maxlength="40" autocomplete="name" autocapitalize="words" spellcheck="false" placeholder="e.g. Sam" required aria-required="true">
           </div>
           <div class="form-group">
             <label for="f-age">Age they’re turning <small>Optional</small></label>
@@ -138,7 +144,7 @@
       </div>
 
       <!-- STEP 2: Theme & Cake -->
-      <div class="workshop-pane" data-step="2">
+      <div class="workshop-pane" role="tabpanel" id="pane-2" aria-labelledby="tab-2" data-step="2">
         <div class="pane-intro">
           <h2>Cake style & color theme</h2>
           <p>Select the color palette for the cake, balloons, and envelope.</p>
@@ -179,7 +185,7 @@
       </div>
 
       <!-- STEP 3: Balloon Notes -->
-      <div class="workshop-pane" data-step="3">
+      <div class="workshop-pane" role="tabpanel" id="pane-3" aria-labelledby="tab-3" data-step="3">
         <div class="pane-intro">
           <h2>Five balloon notes</h2>
           <p>Write up to 5 personal notes or wishes. Each one will float inside an interactive balloon.</p>
@@ -224,7 +230,7 @@
       </div>
 
       <!-- STEP 4: Photos -->
-      <div class="workshop-pane" data-step="4">
+      <div class="workshop-pane" role="tabpanel" id="pane-4" aria-labelledby="tab-4" data-step="4">
         <div class="pane-intro">
           <h2>Photo memories</h2>
           <p>Add up to 5 photos. They are automatically compressed to fit inside the share link.</p>
@@ -240,7 +246,7 @@
       </div>
 
       <!-- STEP 5: Letter -->
-      <div class="workshop-pane" data-step="5">
+      <div class="workshop-pane" role="tabpanel" id="pane-5" aria-labelledby="tab-5" data-step="5">
         <div class="pane-intro">
           <h2>A heartfelt letter</h2>
           <p>Write an intimate letter that will be sealed with a wax seal and unfolded for them.</p>
@@ -265,14 +271,14 @@
       <!-- Workshop Navigation & Actions Footer -->
       <div class="workshop-footer">
         <div class="row">
-          <button type="button" class="btn ghost sm" id="btnBackStep" style="visibility: hidden;">Back</button>
+          <button type="button" class="btn ghost sm" id="btnBackStep" style="visibility: hidden;">← Back</button>
           <button type="button" class="btn ghost sm" id="btnSkipStep" style="display: none;">Skip</button>
         </div>
 
         <p id="formMsg" class="validation-error" role="alert"></p>
 
         <div class="row">
-          <button type="button" class="btn sm" id="btnNextStep">Continue</button>
+          <button type="button" class="btn sm" id="btnNextStep">Continue →</button>
           <button type="button" class="btn gold sm" id="btnWrapGift" style="display: none;">Wrap Your Gift 🎁</button>
         </div>
       </div>
@@ -537,6 +543,7 @@
        PHOTOVIEWER MODAL (My Little Universe Quality)
        ========================================================= -->
   <div class="photo-viewer" id="photoViewer" role="dialog" aria-modal="true" aria-label="High resolution photo view" hidden>
+    <div class="photo-viewer__hint" aria-hidden="true">Esc to close • ← / → to navigate</div>
     <button class="photo-viewer__close" id="pvClose" type="button" aria-label="Close photo viewer">✕</button>
 
     <button class="photo-viewer__nav photo-viewer__nav--prev" id="pvPrev" type="button" aria-label="Previous image">‹</button>

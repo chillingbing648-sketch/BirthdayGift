@@ -62,7 +62,18 @@ Directly modeled on the high-end `PhotoViewer` component from *My Little Univers
 - **Zoom & Pan**: Interactive `+`, `−`, and `⤢` (fit) controls with smooth drag-to-pan when zoomed in.
 - **Touch Swipe Gestures**: Seamless horizontal swiping on mobile devices (swipe delta threshold > 50px).
 - **Keyboard Navigation**: `Escape` to close, `ArrowLeft` for previous, `ArrowRight` for next.
-- **Accessibility**: ARIA dialog roles (`role="dialog" aria-modal="true"`) and focus management.
+- **Accessibility**: ARIA dialog roles (`role="dialog" aria-modal="true"`), focus management, and on-screen keyboard shortcuts hint.
+
+---
+
+## ⚡ Unified Motion System & Form Ergonomics
+
+- **Timing Hierarchy**: Fast tactile interactions (150 ms), standard step transitions (280 ms), and slow emotive reveals (550 ms).
+- **Directional Form Steps**: Forward navigation slides smoothly from the right (`paneSlideForward`), backward navigation slides from the left (`paneSlideBackward`).
+- **Tactile Button Press Depth**: Subtly compresses on `:active` (`translateY(1px) scale(0.98)`), giving instant physical feedback.
+- **Contextual Field Highlighting**: Selecting an inspiration prompt chip immediately scrolls and highlights the targeted note with a soft golden glow.
+- **Accessible Focus System**: High-contrast, 2-pixel gold focus rings with 2-pixel offset for full keyboard accessibility without mouse dependency.
+- **Respects Reduced Motion**: Every animation scales to 0.01 ms under `prefers-reduced-motion: reduce`.
 
 ---
 

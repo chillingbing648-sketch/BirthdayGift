@@ -1098,10 +1098,23 @@ if (dropzone) {
 /* ==============================================================
    WORKSHOP STEPPER & LIVE MINI PREVIEW
    ============================================================== */
+const themeGradients = {
+  violet: 'linear-gradient(135deg, #8b6cff, #ff7eb6)',
+  rose: 'linear-gradient(135deg, #ff8fb1, #e8bf72)',
+  ocean: 'linear-gradient(135deg, #5aa7ff, #7ef0d4)',
+  amber: 'linear-gradient(135deg, #f7a044, #ff5b79)'
+};
+
 function updateLivePreview() {
   const toVal = $('#f-to').value.trim() || 'Someone Special';
   const fromVal = $('#f-from').value.trim() || 'You';
   $('#prevFor').textContent = `For ${toVal}, from ${fromVal}`;
+
+  const currentTheme = $('#f-theme')?.value || 'violet';
+  const themeDot = $('#prevThemeDot');
+  if (themeDot) {
+    themeDot.style.background = themeGradients[currentTheme] || themeGradients.violet;
+  }
 
   const notes = getFormNotes();
   const photoCount = st.photos.length;
@@ -1129,18 +1142,28 @@ function updateLivePreview() {
   }
 }
 
-function updateStepperUI() {
+function updateStepperUI(isForward) {
   const cur = st.currentStep;
 
   $$('.step-tab').forEach(tab => {
     const stepNum = +tab.dataset.step;
-    tab.classList.toggle('active', stepNum === cur);
+    const isActive = stepNum === cur;
+    tab.classList.toggle('active', isActive);
     tab.classList.toggle('done', stepNum < cur);
+    tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
   });
 
   $$('.workshop-pane').forEach(pane => {
     const stepNum = +pane.dataset.step;
-    pane.classList.toggle('active', stepNum === cur);
+    const isActive = stepNum === cur;
+    pane.classList.remove('pane-forward', 'pane-backward');
+    if (isActive) {
+      if (isForward === true) pane.classList.add('pane-forward');
+      else if (isForward === false) pane.classList.add('pane-backward');
+      pane.classList.add('active');
+    } else {
+      pane.classList.remove('active');
+    }
   });
 
   const btnBack = $('#btnBackStep');
@@ -1168,50 +1191,64 @@ function updateStepperUI() {
 function validateCurrentStep() {
   setFormMsg('');
   if (st.currentStep === 1) {
-    const to = $('#f-to').value.trim();
-    const from = $('#f-from').value.trim();
+    const toInput = $('#f-to');
+    const fromInput = $('#f-from');
+    const to = toInput.value.trim();
+    const from = fromInput.value.trim();
+
+    toInput.classList.remove('invalid');
+    fromInput.classList.remove('invalid');
+    toInput.removeAttribute('aria-invalid');
+    fromInput.removeAttribute('aria-invalid');
+
     if (!to) {
+      toInput.classList.add('invalid');
+      toInput.setAttribute('aria-invalid', 'true');
       setFormMsg('Please enter their name.');
-      $('#f-to').focus();
+      toInput.focus();
       return false;
     }
     if (!from) {
+      fromInput.classList.add('invalid');
+      fromInput.setAttribute('aria-invalid', 'true');
       setFormMsg('Please enter your name.');
-      $('#f-from').focus();
+      fromInput.focus();
       return false;
     }
   }
   return true;
 }
 
+function goToStep(targetStep) {
+  if (targetStep === st.currentStep) return;
+  const isForward = targetStep > st.currentStep;
+  if (isForward && !validateCurrentStep()) return;
+  st.currentStep = targetStep;
+  updateStepperUI(isForward);
+}
+
 $('#btnNextStep').onclick = () => {
   if (!validateCurrentStep()) return;
   if (st.currentStep < st.totalSteps) {
-    st.currentStep++;
-    updateStepperUI();
+    goToStep(st.currentStep + 1);
   }
 };
 
 $('#btnBackStep').onclick = () => {
   if (st.currentStep > 1) {
-    st.currentStep--;
-    updateStepperUI();
+    goToStep(st.currentStep - 1);
   }
 };
 
 $('#btnSkipStep').onclick = () => {
   if (st.currentStep < st.totalSteps) {
-    st.currentStep++;
-    updateStepperUI();
+    goToStep(st.currentStep + 1);
   }
 };
 
 $$('.step-tab').forEach(tab => {
   tab.onclick = () => {
-    const target = +tab.dataset.step;
-    if (target > st.currentStep && !validateCurrentStep()) return;
-    st.currentStep = target;
-    updateStepperUI();
+    goToStep(+tab.dataset.step);
   };
 });
 
@@ -1221,7 +1258,26 @@ $('#f-letter').oninput = e => {
   saveDraft();
 };
 
-['#f-to', '#f-from', '#f-age', '#f-date', '#f-greeting', '#f-signoff'].forEach(sel => {
+['#f-to', '#f-from'].forEach(sel => {
+  const el = $(sel);
+  if (el) {
+    el.addEventListener('input', () => {
+      el.classList.remove('invalid');
+      el.removeAttribute('aria-invalid');
+      setFormMsg('');
+      updateLivePreview();
+      saveDraft();
+    });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        $('#btnNextStep').click();
+      }
+    });
+  }
+});
+
+['#f-age', '#f-date', '#f-greeting', '#f-signoff'].forEach(sel => {
   const el = $(sel);
   if (el) {
     el.addEventListener('input', () => {
@@ -1242,6 +1298,26 @@ for (let i = 1; i <= 5; i++) {
 }
 
 $('#f-cd').onchange = saveDraft;
+
+function fillNextEmptyNote(p) {
+  let filledIdx = 0;
+  for (let i = 1; i <= 5; i++) {
+    const el = $(`#f-note-${i}`);
+    if (el && !el.value.trim()) {
+      el.value = p;
+      toast(`Note ${i} added! 🎈`);
+      updateLivePreview();
+      saveDraft();
+      filledIdx = i;
+      el.classList.remove('field-highlight');
+      void el.offsetWidth;
+      el.classList.add('field-highlight');
+      setTimeout(() => el.classList.remove('field-highlight'), 1000);
+      break;
+    }
+  }
+  if (!filledIdx) toast('All 5 balloon notes are filled.');
+}
 
 const tonePrompts = {
   warm: [
@@ -1286,43 +1362,14 @@ $$('#toneChips .chip').forEach(chip => {
       btn.className = 'chip prompt-chip';
       btn.dataset.prompt = p;
       btn.textContent = `"${p.slice(0, 32)}..."`;
-      btn.onclick = () => {
-        let filled = false;
-        for (let i = 1; i <= 5; i++) {
-          const el = $(`#f-note-${i}`);
-          if (el && !el.value.trim()) {
-            el.value = p;
-            toast(`Note ${i} added! 🎈`);
-            updateLivePreview();
-            saveDraft();
-            filled = true;
-            break;
-          }
-        }
-        if (!filled) toast('All 5 balloon notes are filled.');
-      };
+      btn.onclick = () => fillNextEmptyNote(p);
       container.append(btn);
     });
   };
 });
 
 $$('.prompt-chip').forEach(btn => {
-  btn.onclick = () => {
-    const p = btn.dataset.prompt;
-    let filled = false;
-    for (let i = 1; i <= 5; i++) {
-      const el = $(`#f-note-${i}`);
-      if (el && !el.value.trim()) {
-        el.value = p;
-        toast(`Note ${i} added! 🎈`);
-        updateLivePreview();
-        saveDraft();
-        filled = true;
-        break;
-      }
-    }
-    if (!filled) toast('All 5 balloon notes are filled.');
-  };
+  btn.onclick = () => fillNextEmptyNote(btn.dataset.prompt);
 });
 
 $$('#themePicker .theme-card').forEach(card => {
@@ -1332,6 +1379,7 @@ $$('#themePicker .theme-card').forEach(card => {
     const theme = card.dataset.theme;
     $('#f-theme').value = theme;
     document.body.dataset.theme = theme;
+    updateLivePreview();
     saveDraft();
   };
 });
@@ -1366,6 +1414,17 @@ $('#form').onsubmit = e => {
 $('#modalClose').onclick = () => {
   $('#shareModal').hidden = true;
 };
+
+$('#shareModal').onclick = e => {
+  if (e.target === $('#shareModal')) $('#shareModal').hidden = true;
+};
+
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const sm = $('#shareModal');
+    if (sm && !sm.hidden) sm.hidden = true;
+  }
+});
 
 $('#modalBtnCopy').onclick = () => {
   copyText($('#modalLinkOut').value);
