@@ -2,148 +2,499 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0c0610">
-<title>A birthday surprise</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#090818">
+<title>A Personalized Birthday Surprise</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body data-theme="violet">
-<div class="bg" aria-hidden="true"><i></i><i></i><div class="lit"></div><div id="dust"></div></div>
+<!-- Atmospheric Background -->
+<div class="bg" aria-hidden="true">
+  <i></i>
+  <i></i>
+  <div id="dust"></div>
+</div>
 
+<!-- Global Top Header & Controls -->
 <header id="bar" hidden>
   <div class="prog" aria-hidden="true"><b id="progFill"></b></div>
   <div class="ctl">
-    <button id="btnEdit" type="button" hidden>Edit details</button>
-    <button id="btnMusic" type="button" aria-pressed="false">Play music</button>
-    <button id="btnMute" type="button" aria-pressed="false">Mute</button>
+    <span class="ctl-badge" id="stageBadge">Birthday Gift</span>
+    <button id="btnEdit" type="button" hidden aria-label="Edit gift details">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <span>Edit</span>
+    </button>
+    <button id="btnMusic" type="button" aria-pressed="false" aria-label="Toggle ambient soundtrack">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      <span>Music</span>
+    </button>
+    <button id="btnMute" type="button" aria-pressed="false" aria-label="Toggle audio mute">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      <span>Mute</span>
+    </button>
   </div>
 </header>
 
 <main id="app">
+
+  <!-- =========================================================
+       CREATOR WORKSHOP (Multi-Stage Interactive Gift Builder)
+       ========================================================= -->
   <section id="s-build" class="stage left on">
-    <h1 tabindex="-1">Build a birthday surprise</h1>
-    <p class="muted">Fill in what you like, preview it, then send a link. Nothing leaves your browser until you share.</p>
-    <form id="form" novalidate>
-      <div class="grid">
-        <label>Their name<input id="f-to" maxlength="40" autocomplete="off" placeholder="Maya"></label>
-        <label>Your name<input id="f-from" maxlength="40" autocomplete="off" placeholder="Sam"></label>
-        <label>Age they’re turning<input id="f-age" type="number" min="1" max="120" inputmode="numeric" placeholder="25"></label>
-        <label>Birthday date<input id="f-date" type="date"></label>
-        <label>Theme<select id="f-theme"><option value="violet">Burgundy night</option><option value="rose">Rose gold</option><option value="ocean">Violet dusk</option></select></label>
-        <label class="chk"><input id="f-cd" type="checkbox"> Show a countdown when the date is still ahead</label>
-      </div>
-      <label>Balloon notes <small>One per line, up to 6, 90 characters each</small>
-        <textarea id="f-notes" rows="4" placeholder="You make every room warmer&#10;Still my favourite person to laugh with"></textarea></label>
-      <fieldset>
-        <legend>Memories <small>Up to 5 photos. They’re shrunk so they fit inside the link.</small></legend>
-        <input id="f-photos" type="file" accept="image/*" multiple aria-label="Add photos">
-        <ul id="plist"></ul>
-      </fieldset>
-      <label>Personal letter <small>Up to 900 characters</small>
-        <textarea id="f-letter" rows="6" maxlength="900" placeholder="Dear Maya, ..."></textarea></label>
-      <label>Your own music <small>Optional. Plays on this device only; it can’t travel inside a link.</small>
-        <input id="f-music" type="file" accept="audio/*"></label>
-      <p id="formMsg" class="msg" role="alert"></p>
-      <div class="row">
-        <button class="btn" type="submit">Preview the experience</button>
-        <button class="btn ghost" type="button" id="btnLink">Get share link</button>
-      </div>
-      <div id="linkBox" hidden>
-        <input id="linkOut" readonly aria-label="Share link">
-        <div class="row">
-          <button type="button" class="btn ghost" id="btnCopy">Copy link</button>
-          <button type="button" class="btn ghost" id="btnShare">Share</button>
+    <div class="workshop-header">
+      <h1 tabindex="-1" class="workshop-title">Craft a Virtual Gift</h1>
+      <p class="workshop-subtitle">Build a deeply personal birthday journey filled with memories, wishes, and love — wrapped inside a shareable link.</p>
+    </div>
+
+    <!-- Step Navigation Pills -->
+    <nav class="step-nav" aria-label="Gift creation stages">
+      <button type="button" class="step-tab active" data-step="1">
+        <span class="step-num">1</span>
+        <span>The Person</span>
+      </button>
+      <button type="button" class="step-tab" data-step="2">
+        <span class="step-num">2</span>
+        <span>Memories</span>
+      </button>
+      <button type="button" class="step-tab" data-step="3">
+        <span class="step-num">3</span>
+        <span>Surprises</span>
+      </button>
+      <button type="button" class="step-tab" data-step="4">
+        <span class="step-num">4</span>
+        <span>Letter</span>
+      </button>
+      <button type="button" class="step-tab" data-step="5">
+        <span class="step-num">5</span>
+        <span>Finishing Touches</span>
+      </button>
+    </nav>
+
+    <!-- Miniature Live Preview Drawer -->
+    <aside class="live-preview-drawer" aria-label="Gift miniature preview">
+      <div class="live-preview-box">
+        <div class="mini-box-icon" aria-hidden="true">🎁</div>
+        <div class="mini-box-details">
+          <span class="mini-box-for" id="prevFor">For Maya, from Sam</span>
+          <span class="mini-box-stats" id="prevStats">✨ Ready to personalize</span>
         </div>
-        <p class="muted">The link’s data is encoded, not encrypted. Anyone with the link can read it, so keep passwords and private details out.</p>
+      </div>
+      <div class="link-meter" title="Link size indicator">
+        <div class="link-meter-bar">
+          <div class="link-meter-fill" id="meterFill" style="width: 15%;"></div>
+        </div>
+        <span class="link-meter-text" id="meterText">Compact link (2 KB)</span>
+      </div>
+    </aside>
+
+    <!-- Main Workshop Form Card -->
+    <form id="form" class="workshop-card glass" novalidate>
+      
+      <!-- STAGE 1: The Person -->
+      <div class="workshop-pane active" data-step="1">
+        <div class="pane-intro">
+          <h2><span>✨</span> Who are we celebrating?</h2>
+          <p>Set the foundation of this gift with their name and birthday details.</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="f-to">Their name <small>Required</small></label>
+            <input id="f-to" maxlength="40" autocomplete="off" placeholder="e.g. Maya" required>
+          </div>
+          <div class="form-group">
+            <label for="f-from">Your name <small>Required</small></label>
+            <input id="f-from" maxlength="40" autocomplete="off" placeholder="e.g. Sam" required>
+          </div>
+          <div class="form-group">
+            <label for="f-age">Age they’re turning <small>Optional</small></label>
+            <input id="f-age" type="number" min="1" max="120" inputmode="numeric" placeholder="e.g. 25">
+          </div>
+          <div class="form-group">
+            <label for="f-date">Birthday date <small>Optional</small></label>
+            <input id="f-date" type="date">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tone of your celebration <small>Helps suggest ideas</small></label>
+          <div class="chips-row" id="toneChips">
+            <button type="button" class="chip active" data-tone="warm">Romantic / Partner</button>
+            <button type="button" class="chip" data-tone="friend">Best Friend</button>
+            <button type="button" class="chip" data-tone="family">Family / Sweet</button>
+            <button type="button" class="chip" data-tone="playful">Playful / Joyful</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAGE 2: Our Memories -->
+      <div class="workshop-pane" data-step="2">
+        <div class="pane-intro">
+          <h2><span>📸</span> Cherished Memories</h2>
+          <p>Add up to 5 photos together. They are automatically compressed to fit seamlessly into the link.</p>
+        </div>
+
+        <div class="upload-dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload memory photos">
+          <input id="f-photos" type="file" accept="image/*" multiple aria-label="Upload photos">
+          <div style="font-size: 2rem; margin-bottom: 6px;">✨</div>
+          <p style="font-weight: 500;">Click or drag photos here to add memories</p>
+          <p class="muted" style="font-size: 0.85rem; margin-top: 4px;">PNG or JPEG • Up to 5 photos • Auto-optimized</p>
+        </div>
+
+        <div class="photo-cards-list" id="plist"></div>
+      </div>
+
+      <!-- STAGE 3: Little Surprises (Balloon Notes) -->
+      <div class="workshop-pane" data-step="3">
+        <div class="pane-intro">
+          <h2><span>🎈</span> Whispered Wishes in the Sky</h2>
+          <p>Write sweet notes, quotes, or inside jokes. Each one will float inside a balloon waiting to be popped!</p>
+        </div>
+
+        <div class="form-group">
+          <label>Inspiration Prompts <small>Click to paste into notes</small></label>
+          <div class="chips-row" id="promptChips">
+            <button type="button" class="chip prompt-chip" data-prompt="You make every room warmer just by being in it.">✨ "You make every room warmer..."</button>
+            <button type="button" class="chip prompt-chip" data-prompt="Still my absolute favourite person to laugh with.">💛 "My favourite person to laugh with..."</button>
+            <button type="button" class="chip prompt-chip" data-prompt="Remember that unforgettable night under the stars?">🌙 "Remember that night..."</button>
+            <button type="button" class="chip prompt-chip" data-prompt="Here’s to another year of unstoppable adventures together!">🚀 "Here's to another year of..."</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="f-notes">Balloon notes <small>One per line, up to 6 notes (90 chars each)</small></label>
+          <textarea id="f-notes" rows="5" placeholder="You make every room warmer&#10;Still my favourite person to laugh with&#10;Remember that time we couldn't stop laughing?"></textarea>
+        </div>
+      </div>
+
+      <!-- STAGE 4: Your Letter -->
+      <div class="workshop-pane" data-step="4">
+        <div class="pane-intro">
+          <h2><span>💌</span> A Heartfelt Letter</h2>
+          <p>Write an intimate letter that will be sealed with a golden wax seal and unfolded just for them.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="f-greeting">Opening Greeting <small>Optional</small></label>
+          <input id="f-greeting" maxlength="60" placeholder="Dear Maya," value="Dear Maya,">
+        </div>
+
+        <div class="form-group">
+          <label for="f-letter">Letter Message <small id="letterCount">0 / 900</small></label>
+          <textarea id="f-letter" rows="7" maxlength="900" placeholder="Write from the heart... What makes them irreplaceable? What do you wish for them in this new chapter?"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="f-signoff">Personal Sign-off <small>Optional</small></label>
+          <input id="f-signoff" maxlength="60" placeholder="With all my love," value="With all my love,">
+        </div>
+      </div>
+
+      <!-- STAGE 5: The Finishing Touches -->
+      <div class="workshop-pane" data-step="5">
+        <div class="pane-intro">
+          <h2><span>🎁</span> The Finishing Touches</h2>
+          <p>Choose the color palette, music ambiance, and wrap your virtual gift.</p>
+        </div>
+
+        <div class="form-group">
+          <label>Visual Theme</label>
+          <div class="theme-picker" id="themePicker">
+            <div class="theme-card active" data-theme="violet">
+              <div class="theme-swatch" style="background: linear-gradient(135deg, #8b6cff, #ff7eb6);"></div>
+              <span class="theme-name">Burgundy Night</span>
+            </div>
+            <div class="theme-card" data-theme="rose">
+              <div class="theme-swatch" style="background: linear-gradient(135deg, #ff8fb1, #f4c978);"></div>
+              <span class="theme-name">Rose Gold</span>
+            </div>
+            <div class="theme-card" data-theme="ocean">
+              <div class="theme-swatch" style="background: linear-gradient(135deg, #5aa7ff, #7ef0d4);"></div>
+              <span class="theme-name">Violet Dusk</span>
+            </div>
+            <div class="theme-card" data-theme="amber">
+              <div class="theme-swatch" style="background: linear-gradient(135deg, #f7a044, #ff5b79);"></div>
+              <span class="theme-name">Golden Twilight</span>
+            </div>
+          </div>
+          <select id="f-theme" hidden>
+            <option value="violet" selected>Burgundy night</option>
+            <option value="rose">Rose gold</option>
+            <option value="ocean">Violet dusk</option>
+            <option value="amber">Golden twilight</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="row mid" style="cursor: pointer; justify-content: flex-start; gap: 10px;">
+            <input id="f-cd" type="checkbox" style="width: auto;">
+            <span>Show an anticipation countdown if their birthday is still ahead</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="f-music">Optional custom music <small>Device preview only (not shared in link)</small></label>
+          <input id="f-music" type="file" accept="audio/*">
+          <small class="muted">A soothing synthesized music box will play automatically on any device when opened.</small>
+        </div>
+      </div>
+
+      <!-- Workshop Navigation & Actions Footer -->
+      <div class="workshop-footer">
+        <div class="row">
+          <button type="button" class="btn ghost sm" id="btnBackStep" style="visibility: hidden;">Back</button>
+          <button type="button" class="btn ghost sm" id="btnSkipStep" style="display: none;">Skip this step</button>
+        </div>
+
+        <p id="formMsg" class="validation-error" role="alert"></p>
+
+        <div class="row">
+          <button type="button" class="btn sm" id="btnNextStep">Continue</button>
+          <button type="button" class="btn gold sm" id="btnWrapGift" style="display: none;">Wrap Your Gift 🎁</button>
+        </div>
       </div>
     </form>
   </section>
 
+  <!-- =========================================================
+       ERROR STAGE (Corrupted or Invalid Link)
+       ========================================================= -->
   <section id="s-error" class="stage">
-    <h1 tabindex="-1">This link can’t be opened</h1>
-    <p id="errMsg" class="muted"></p>
-    <button class="btn" id="errMake" type="button">Create your own</button>
+    <div style="font-size: 3.5rem; margin-bottom: -10px;">💫</div>
+    <h1 tabindex="-1">This gift link can’t be opened</h1>
+    <p id="errMsg" class="muted" style="max-width: 480px;">The link appears to be incomplete or modified. Please check with the sender to share the full link again.</p>
+    <button class="btn gold" id="errMake" type="button">Create your own gift</button>
   </section>
 
+  <!-- =========================================================
+       RECIPIENT SCENE 1: THE WRAPPED GIFT (Intro)
+       ========================================================= -->
   <section id="s-intro" class="stage">
-    <h1 tabindex="-1" id="introH"></h1>
-    <p class="muted">Sound is part of it. Turn your volume up.</p>
-    <button class="btn" id="introBtn" type="button">Open the gift</button>
+    <div class="gift-stage-wrapper">
+      <div class="gift-box-3d" id="giftBox" role="button" tabindex="0" aria-label="Unwrap your birthday surprise">
+        <div class="gift-cube">
+          <div class="gift-ribbon-v"></div>
+          <div class="gift-ribbon-h"></div>
+        </div>
+        <!-- Gold Bow SVG -->
+        <svg class="gift-bow" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 50 C30 20, 10 35, 35 50 C10 65, 30 80, 50 50 Z" fill="url(#bowGrad)"/>
+          <path d="M50 50 C70 20, 90 35, 65 50 C90 65, 70 80, 50 50 Z" fill="url(#bowGrad)"/>
+          <circle cx="50" cy="50" r="11" fill="#ffe299" stroke="#b8832a" stroke-width="2"/>
+          <defs>
+            <linearGradient id="bowGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fff0be"/>
+              <stop offset="50%" stop-color="#f4c978"/>
+              <stop offset="100%" stop-color="#b8832a"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="gift-tag" id="introTag">
+          <strong>Special Delivery</strong>
+          <span id="tagTo">For Maya</span><br>
+          <small id="tagFrom">From Sam</small>
+        </div>
+      </div>
+    </div>
+
+    <h1 tabindex="-1" id="introH" class="hero">A gift for Maya</h1>
+    <p class="gift-invitation-hint">
+      <span>✨</span> Untie the ribbon to begin • Sound on <span>🎵</span>
+    </p>
+    <button class="btn gold" id="introBtn" type="button">Open the gift</button>
   </section>
 
+  <!-- =========================================================
+       RECIPIENT SCENE 2: COUNTDOWN
+       ========================================================= -->
   <section id="s-count" class="stage">
-    <h1 tabindex="-1" id="cdH"></h1>
-    <p id="cd" class="big" role="timer"></p>
-    <button class="btn" id="cdBtn" type="button">Open early</button>
+    <div style="font-size: 2.8rem;">✨</div>
+    <h1 tabindex="-1" id="cdH">The countdown begins</h1>
+    <p class="muted">Your special day is just over the horizon.</p>
+    <div class="countdown-box">
+      <div class="countdown-item">
+        <span class="countdown-value" id="cdDays">00</span>
+        <span class="countdown-label">Days</span>
+      </div>
+      <div class="countdown-item">
+        <span class="countdown-value" id="cdHours">00</span>
+        <span class="countdown-label">Hours</span>
+      </div>
+      <div class="countdown-item">
+        <span class="countdown-value" id="cdMins">00</span>
+        <span class="countdown-label">Mins</span>
+      </div>
+      <div class="countdown-item">
+        <span class="countdown-value" id="cdSecs">00</span>
+        <span class="countdown-label">Secs</span>
+      </div>
+    </div>
+    <button class="btn gold" id="cdBtn" type="button">Open early anyway ✨</button>
   </section>
 
+  <!-- =========================================================
+       RECIPIENT SCENE 3: CAKE & WISH RITUAL
+       ========================================================= -->
   <section id="s-cake" class="stage">
-    <h1 tabindex="-1" id="cakeH"></h1>
-    <p id="cakeP" class="muted" role="status"></p>
+    <h1 tabindex="-1" id="cakeH">Maya, it’s your moment</h1>
+    <p id="cakeP" class="muted" role="status">Tap each glowing flame, or blow them all out together.</p>
+    
     <svg id="cake" viewBox="0 0 300 250" role="group" aria-label="Birthday cake with candles">
       <defs>
-        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient>
-        <radialGradient id="glow"><stop offset="0" stop-color="#ffd98a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
-      <linearGradient id="sh" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset=".35" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient></defs>
-      <ellipse cx="150" cy="241" rx="142" ry="11" fill="#000" opacity=".5"/><ellipse cx="150" cy="236" rx="140" ry="12" fill="#f2dcb3"/>
+        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="var(--a1)"/>
+          <stop offset="100%" stop-color="var(--a2)"/>
+        </linearGradient>
+        <radialGradient id="glow">
+          <stop offset="0%" stop-color="#ffd98a" stop-opacity="0.85"/>
+          <stop offset="60%" stop-color="#ffd98a" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#ffd98a" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="sh" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#000" stop-opacity="0.45"/>
+          <stop offset="35%" stop-color="#fff" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#000" stop-opacity="0.5"/>
+        </linearGradient>
+      </defs>
+      
+      <!-- Cake Base / Plate -->
+      <ellipse cx="150" cy="241" rx="142" ry="11" fill="#000" opacity="0.45"/>
+      <ellipse cx="150" cy="236" rx="140" ry="12" fill="#f2dcb3"/>
+      
+      <!-- Bottom Cake Tier -->
       <rect x="30" y="160" width="240" height="76" rx="14" fill="url(#g1)"/>
       <rect x="30" y="160" width="240" height="20" rx="10" fill="#fff3d6"/>
-      <rect x="30" y="206" width="240" height="4" fill="#f2dcb3"/><rect x="30" y="160" width="240" height="76" rx="14" fill="url(#sh)"/>
+      <rect x="30" y="206" width="240" height="4" fill="#f2dcb3"/>
+      <rect x="30" y="160" width="240" height="76" rx="14" fill="url(#sh)"/>
+      
+      <!-- Top Cake Tier -->
       <rect x="70" y="108" width="160" height="56" rx="12" fill="url(#g1)"/>
       <rect x="70" y="108" width="160" height="16" rx="8" fill="#fff3d6"/>
-      <rect x="70" y="146" width="160" height="4" fill="#f2dcb3"/><rect x="70" y="108" width="160" height="56" rx="12" fill="url(#sh)"/>
+      <rect x="70" y="146" width="160" height="4" fill="#f2dcb3"/>
+      <rect x="70" y="108" width="160" height="56" rx="12" fill="url(#sh)"/>
+      
+      <!-- Decorative Sprinkles / Pearls -->
+      <circle cx="85" cy="180" r="3" fill="#ffd98a"/>
+      <circle cx="120" cy="190" r="2.5" fill="#ffd98a"/>
+      <circle cx="160" cy="182" r="3" fill="#ffd98a"/>
+      <circle cx="210" cy="188" r="2.5" fill="#ffd98a"/>
+      
+      <!-- Dynamic Candles Container -->
       <g id="candles"></g>
     </svg>
-    <button class="btn" id="cakeBtn" type="button"></button>
-  </section>
 
-  <section id="s-balloons" class="stage">
-    <h1 tabindex="-1" id="balH"></h1>
-    <div id="sky" class="sky"></div>
-    <p id="noteCard" class="glass note" role="status"></p>
-    <button class="btn" id="balBtn" type="button" hidden>Continue</button>
-  </section>
-
-  <section id="s-gallery" class="stage">
-    <h1 tabindex="-1">Memories</h1>
-    <div id="slides" class="slides" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Photo memories"></div>
     <div class="row mid">
-      <button class="btn ghost" id="galPrev" type="button" aria-label="Previous photo">Back</button>
-      <span id="galCount" class="muted" aria-live="polite"></span>
-      <button class="btn ghost" id="galNext" type="button" aria-label="Next photo">Next</button>
+      <button class="btn gold" id="cakeBtn" type="button">Blow out the candles</button>
     </div>
-    <button class="btn" id="galBtn" type="button">Continue</button>
   </section>
 
+  <!-- =========================================================
+       RECIPIENT SCENE 4: FLOATING BALLOONS OF WHISPERED WISHES
+       ========================================================= -->
+  <section id="s-balloons" class="stage">
+    <h1 tabindex="-1" id="balH">Notes in the Sky</h1>
+    <p class="muted" id="balSub">Tap each balloon to release the message waiting inside.</p>
+    <div id="sky" class="sky"></div>
+    <div id="noteCard" class="glass note" role="status">
+      <span>Tap a balloon floating above to discover a secret message.</span>
+    </div>
+    <button class="btn gold" id="balBtn" type="button" hidden>Continue Journey</button>
+  </section>
+
+  <!-- =========================================================
+       RECIPIENT SCENE 5: MEMORY PHOTO GALLERY
+       ========================================================= -->
+  <section id="s-gallery" class="stage">
+    <h1 tabindex="-1">Cherished Memories</h1>
+    <p class="muted">Moments that mean the world to us.</p>
+    
+    <div id="slides" class="slides" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Photo memories"></div>
+    
+    <div class="row mid" style="gap: 16px;">
+      <button class="btn ghost sm" id="galPrev" type="button" aria-label="Previous photo">← Back</button>
+      <span id="galCount" class="muted" aria-live="polite" style="font-weight: 500;"></span>
+      <button class="btn ghost sm" id="galNext" type="button" aria-label="Next photo">Next →</button>
+    </div>
+
+    <button class="btn gold" id="galBtn" type="button">Continue</button>
+  </section>
+
+  <!-- =========================================================
+       RECIPIENT SCENE 6: THE WAX-SEALED LETTER
+       ========================================================= -->
   <section id="s-letter" class="stage">
-    <h1 tabindex="-1">A letter for you</h1>
-    <div id="env" class="env"><div class="flap"></div><div class="seal"></div></div>
-    <button class="btn" id="openLet" type="button">Open the letter</button>
+    <h1 tabindex="-1">A Letter Just For You</h1>
+    <p class="muted">Written with love, sealed with care.</p>
+    
+    <div id="env" class="env" tabindex="0" role="button" aria-label="Break the wax seal to open the letter">
+      <div class="flap"></div>
+      <div class="seal">❤️</div>
+    </div>
+    
+    <button class="btn gold" id="openLet" type="button">Break Seal & Open Letter</button>
+    
     <div id="sheet" class="sheet" hidden>
+      <p id="letterGreeting" style="font-weight: 600; margin-bottom: 0.8em;"></p>
       <span id="letterText" aria-hidden="true"></span>
       <p id="letterFull" class="vh"></p>
       <p id="sig" class="sig" hidden></p>
+      <div style="margin-top: 14px; text-align: center;">
+        <button type="button" id="btnSkipTyping" class="btn ghost sm" style="font-size: 0.8rem; padding: 4px 12px; min-height: 30px;">Reveal all</button>
+      </div>
     </div>
-    <button class="btn" id="letBtn" type="button" hidden>Continue</button>
+    
+    <button class="btn gold" id="letBtn" type="button" hidden>Continue</button>
   </section>
 
+  <!-- =========================================================
+       RECIPIENT SCENE 7: GRAND FINALE CELEBRATION
+       ========================================================= -->
   <section id="s-final" class="stage">
-    <h1 tabindex="-1" id="finH" class="hero"></h1>
+    <div class="finale-badge" id="finBadge">Happy Birthday</div>
+    <h1 tabindex="-1" id="finH" class="hero">Happy Birthday, Maya!</h1>
     <p id="finP" class="lead"></p>
     <p id="finD" class="muted"></p>
-    <div class="row mid">
-      <button class="btn" id="fShare" type="button">Share</button>
-      <button class="btn ghost" id="fCopy" type="button">Copy link</button>
-      <button class="btn ghost" id="fMore" type="button">More confetti</button>
-      <button class="btn ghost" id="fReplay" type="button">Replay</button>
-      <button class="btn ghost" id="fEdit" type="button" hidden>Edit details</button>
-      <button class="btn ghost" id="fMake" type="button" hidden>Make your own</button>
+
+    <div class="row mid" style="gap: 12px; margin-top: 8px;">
+      <button class="btn gold" id="fShare" type="button">Share this Gift</button>
+      <button class="btn ghost" id="fCopy" type="button">Copy Link</button>
+      <button class="btn ghost" id="fMore" type="button">More Confetti ✨</button>
+      <button class="btn ghost" id="fReplay" type="button">Replay ↺</button>
+      <button class="btn ghost" id="fEdit" type="button" hidden>Edit Details</button>
+      <button class="btn gold" id="fMake" type="button" hidden>Make Your Own Gift 🎁</button>
     </div>
   </section>
+
 </main>
 
+<!-- Share & Link Ready Modal -->
+<div id="shareModal" class="modal-overlay" hidden>
+  <div class="modal-content glass">
+    <button type="button" class="modal-close" id="modalClose" aria-label="Close dialog">✕</button>
+    <div style="font-size: 2.8rem; margin-bottom: -6px;">🎁</div>
+    <h2>Your Gift is Wrapped!</h2>
+    <p class="muted">Anyone with this link will experience the personalized virtual birthday journey you just created.</p>
+    
+    <input id="modalLinkOut" readonly aria-label="Share link" style="text-align: center; font-size: 0.9rem;">
+    
+    <div class="row mid">
+      <button type="button" class="btn gold" id="modalBtnShare">Share Link</button>
+      <button type="button" class="btn ghost" id="modalBtnCopy">Copy Link</button>
+      <button type="button" class="btn ghost" id="modalBtnPreview">Preview as Recipient</button>
+    </div>
+
+    <p class="muted" style="font-size: 0.8rem; margin-top: 4px;">
+      Data is compressed and encoded in the link URL. No signups or servers required.
+    </p>
+  </div>
+</div>
+
+<!-- Canvas FX (Confetti & Stardust) -->
 <canvas id="fx" aria-hidden="true"></canvas>
+
+<!-- Global Toast Notification -->
 <div id="toast" role="status" aria-live="polite"></div>
+
 <script src="script.js"></script>
 </body>
 </html>
