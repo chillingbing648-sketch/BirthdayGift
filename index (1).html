@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c0610">
+<title>A birthday surprise</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="violet">
+<div class="bg" aria-hidden="true"><i></i><i></i><div class="lit"></div><div id="dust"></div></div>
+
+<header id="bar" hidden>
+  <div class="prog" aria-hidden="true"><b id="progFill"></b></div>
+  <div class="ctl">
+    <button id="btnEdit" type="button" hidden>Edit details</button>
+    <button id="btnMusic" type="button" aria-pressed="false">Play music</button>
+    <button id="btnMute" type="button" aria-pressed="false">Mute</button>
+  </div>
+</header>
+
+<main id="app">
+  <section id="s-build" class="stage left on">
+    <h1 tabindex="-1">Build a birthday surprise</h1>
+    <p class="muted">Fill in what you like, preview it, then send a link. Nothing leaves your browser until you share.</p>
+    <form id="form" novalidate>
+      <div class="grid">
+        <label>Their name<input id="f-to" maxlength="40" autocomplete="off" placeholder="Maya"></label>
+        <label>Your name<input id="f-from" maxlength="40" autocomplete="off" placeholder="Sam"></label>
+        <label>Age they’re turning<input id="f-age" type="number" min="1" max="120" inputmode="numeric" placeholder="25"></label>
+        <label>Birthday date<input id="f-date" type="date"></label>
+        <label>Theme<select id="f-theme"><option value="violet">Burgundy night</option><option value="rose">Rose gold</option><option value="ocean">Violet dusk</option></select></label>
+        <label class="chk"><input id="f-cd" type="checkbox"> Show a countdown when the date is still ahead</label>
+      </div>
+      <label>Balloon notes <small>One per line, up to 6, 90 characters each</small>
+        <textarea id="f-notes" rows="4" placeholder="You make every room warmer&#10;Still my favourite person to laugh with"></textarea></label>
+      <fieldset>
+        <legend>Memories <small>Up to 5 photos. They’re shrunk so they fit inside the link.</small></legend>
+        <input id="f-photos" type="file" accept="image/*" multiple aria-label="Add photos">
+        <ul id="plist"></ul>
+      </fieldset>
+      <label>Personal letter <small>Up to 900 characters</small>
+        <textarea id="f-letter" rows="6" maxlength="900" placeholder="Dear Maya, ..."></textarea></label>
+      <label>Your own music <small>Optional. Plays on this device only; it can’t travel inside a link.</small>
+        <input id="f-music" type="file" accept="audio/*"></label>
+      <p id="formMsg" class="msg" role="alert"></p>
+      <div class="row">
+        <button class="btn" type="submit">Preview the experience</button>
+        <button class="btn ghost" type="button" id="btnLink">Get share link</button>
+      </div>
+      <div id="linkBox" hidden>
+        <input id="linkOut" readonly aria-label="Share link">
+        <div class="row">
+          <button type="button" class="btn ghost" id="btnCopy">Copy link</button>
+          <button type="button" class="btn ghost" id="btnShare">Share</button>
+        </div>
+        <p class="muted">The link’s data is encoded, not encrypted. Anyone with the link can read it, so keep passwords and private details out.</p>
+      </div>
+    </form>
+  </section>
+
+  <section id="s-error" class="stage">
+    <h1 tabindex="-1">This link can’t be opened</h1>
+    <p id="errMsg" class="muted"></p>
+    <button class="btn" id="errMake" type="button">Create your own</button>
+  </section>
+
+  <section id="s-intro" class="stage">
+    <h1 tabindex="-1" id="introH"></h1>
+    <p class="muted">Sound is part of it. Turn your volume up.</p>
+    <button class="btn" id="introBtn" type="button">Open the gift</button>
+  </section>
+
+  <section id="s-count" class="stage">
+    <h1 tabindex="-1" id="cdH"></h1>
+    <p id="cd" class="big" role="timer"></p>
+    <button class="btn" id="cdBtn" type="button">Open early</button>
+  </section>
+
+  <section id="s-cake" class="stage">
+    <h1 tabindex="-1" id="cakeH"></h1>
+    <p id="cakeP" class="muted" role="status"></p>
+    <svg id="cake" viewBox="0 0 300 250" role="group" aria-label="Birthday cake with candles">
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--a1)"/><stop offset="1" style="stop-color:var(--a2)"/></linearGradient>
+        <radialGradient id="glow"><stop offset="0" stop-color="#ffd98a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
+      <linearGradient id="sh" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset=".35" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient></defs>
+      <ellipse cx="150" cy="241" rx="142" ry="11" fill="#000" opacity=".5"/><ellipse cx="150" cy="236" rx="140" ry="12" fill="#f2dcb3"/>
+      <rect x="30" y="160" width="240" height="76" rx="14" fill="url(#g1)"/>
+      <rect x="30" y="160" width="240" height="20" rx="10" fill="#fff3d6"/>
+      <rect x="30" y="206" width="240" height="4" fill="#f2dcb3"/><rect x="30" y="160" width="240" height="76" rx="14" fill="url(#sh)"/>
+      <rect x="70" y="108" width="160" height="56" rx="12" fill="url(#g1)"/>
+      <rect x="70" y="108" width="160" height="16" rx="8" fill="#fff3d6"/>
+      <rect x="70" y="146" width="160" height="4" fill="#f2dcb3"/><rect x="70" y="108" width="160" height="56" rx="12" fill="url(#sh)"/>
+      <g id="candles"></g>
+    </svg>
+    <button class="btn" id="cakeBtn" type="button"></button>
+  </section>
+
+  <section id="s-balloons" class="stage">
+    <h1 tabindex="-1" id="balH"></h1>
+    <div id="sky" class="sky"></div>
+    <p id="noteCard" class="glass note" role="status"></p>
+    <button class="btn" id="balBtn" type="button" hidden>Continue</button>
+  </section>
+
+  <section id="s-gallery" class="stage">
+    <h1 tabindex="-1">Memories</h1>
+    <div id="slides" class="slides" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Photo memories"></div>
+    <div class="row mid">
+      <button class="btn ghost" id="galPrev" type="button" aria-label="Previous photo">Back</button>
+      <span id="galCount" class="muted" aria-live="polite"></span>
+      <button class="btn ghost" id="galNext" type="button" aria-label="Next photo">Next</button>
+    </div>
+    <button class="btn" id="galBtn" type="button">Continue</button>
+  </section>
+
+  <section id="s-letter" class="stage">
+    <h1 tabindex="-1">A letter for you</h1>
+    <div id="env" class="env"><div class="flap"></div><div class="seal"></div></div>
+    <button class="btn" id="openLet" type="button">Open the letter</button>
+    <div id="sheet" class="sheet" hidden>
+      <span id="letterText" aria-hidden="true"></span>
+      <p id="letterFull" class="vh"></p>
+      <p id="sig" class="sig" hidden></p>
+    </div>
+    <button class="btn" id="letBtn" type="button" hidden>Continue</button>
+  </section>
+
+  <section id="s-final" class="stage">
+    <h1 tabindex="-1" id="finH" class="hero"></h1>
+    <p id="finP" class="lead"></p>
+    <p id="finD" class="muted"></p>
+    <div class="row mid">
+      <button class="btn" id="fShare" type="button">Share</button>
+      <button class="btn ghost" id="fCopy" type="button">Copy link</button>
+      <button class="btn ghost" id="fMore" type="button">More confetti</button>
+      <button class="btn ghost" id="fReplay" type="button">Replay</button>
+      <button class="btn ghost" id="fEdit" type="button" hidden>Edit details</button>
+      <button class="btn ghost" id="fMake" type="button" hidden>Make your own</button>
+    </div>
+  </section>
+</main>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="script.js"></script>
+</body>
+</html>
