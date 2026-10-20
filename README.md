@@ -39,14 +39,18 @@ Inspired by the clean, restrained design philosophy of [ourmoments.live](https:/
 
 ## 🎁 The Recipient Journey: Delightful & Immersive
 
-1. **The Wrapped Gift Box**: A clean wrapped gift box with ribbon and gold tag (*"For Maya, from Sam"*). Tapping the ribbon unties it with a sound effect.
+1. **The Wrapped Gift Box**: A clean wrapped gift box with ribbon and gold tag (*"For Maya, from Sam"*). Tapping the ribbon unties it with an organic ribbon-curling animation and sound effect.
 2. **Countdown (Optional)**: If the birthday date is in the future, a stellar countdown counts down the days, hours, and minutes with an *"Open early anyway ✨"* button.
-3. **Cinematic Birthday Film & Soundtrack**: A built-in, theater-style video player with procedural celebratory motion graphics, scrubber timeline, play/pause, volume control, and fullscreen support. Plays the built-in procedural music box soundtrack.
-4. **The Birthday Cake & Wish Ritual**: An artisan tiered SVG cake with glowing candle flames. Tap individual flames to blow them out with a puff of smoke SFX, or blow them all out together, followed by *"Make a wish"* and celebratory cake cutting.
-5. **Floating Balloons & Decorative Balloon Trees**: Shimmering balloons swaying gently against the stars, flanked by multi-layered SVG balloon bouquets. Tapping each floating balloon pops it with sound and confetti, revealing secret personal notes into an elegant card.
+3. **Cinematic Birthday Film & Soundtrack**: A built-in, theater-style video player with procedural celebratory motion graphics, scrubber timeline, play/pause, volume control, and fullscreen support. Plays the built-in procedural music box soundtrack with live audio-wave visualization.
+4. **The Birthday Cake & Wish Ritual**: An artisan tiered SVG cake with individually igniting candle flames:
+   - **Phase 1: Make a Wish**: Recipient makes their secret birthday wish.
+   - **Phase 2: Blow the Candles**: Tap individual flames or the *"Blow out candles"* action to extinguish flames with realistic SVG smoke puffs and wind sound effects.
+   - **Phase 3: Cut the Cake**: Slice the celebratory cake to unlock the next stage.
+5. **Floating Balloons, Decorative Balloon Trees & Discovered Tray**: Shimmering balloons swaying gently against the stars, flanked by multi-layered SVG balloon bouquets. Tapping each floating balloon pops it with sound, squash physics, and confetti, revealing secret personal notes into an elegant card. Popped notes accumulate in a **Discovered Messages Tray** allowing the recipient to revisit any note at any time.
 6. **Cherished Memories & Premium PhotoViewer**: A clean polaroid-style gallery. Clicking any image opens the **My Little Universe-grade PhotoViewer** lightbox: uncropped full-resolution rendering (`object-fit: contain`), zoom in/out/fit controls, drag-to-pan, mobile swipe gestures, and keyboard navigation (`ArrowLeft`, `ArrowRight`, `Escape`).
-7. **The Wax-Sealed Letter**: A clean envelope with an embossed wax seal. Tap to break the wax with a sound effect. The letter unfolds with calligraphy/typewriter pacing and a reveal-all option.
+7. **The Wax-Sealed Letter**: A clean envelope with an embossed wax seal. Tap to break the wax with an authentic stamp sound effect. The flap folds open, and the letter rises with calligraphy/typewriter pacing and a reveal-all option.
 8. **Grand Finale Celebration**: A celebratory shower of confetti, milestone celebration banner, ambient music box soundtrack, and actions to share, replay, or create a gift for someone else.
+9. **Interactive Atmosphere**: Ambient drifting fireflies across the canvas and an interactive pointer sparkle trail (*"A Little Birthday Magic"*) responsive to mouse movement and mobile touches.
 
 ---
 

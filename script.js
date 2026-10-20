@@ -23,7 +23,8 @@ const st = {
   tm: 0,
   ck: 0,
   popped: 0,
-  tone: 'warm'
+  tone: 'warm',
+  discoveredNotes: []   // Array of { text, index }
 };
 
 const bad = msg => Object.assign(new Error(msg), { ok: 1 });
@@ -264,7 +265,7 @@ function flashBloom() {
   b.classList.remove('bloom');
   void b.offsetWidth;
   b.classList.add('bloom');
-  setTimeout(() => b.classList.remove('bloom'), 1000);
+  setTimeout(() => b.classList.remove('bloom'), 800);
 }
 
 function showStage(id) {
@@ -378,7 +379,7 @@ const AudioEngine = {
       const c = AudioEngine.getCtx();
       if (!c) return;
       const t = c.currentTime;
-      AudioEngine.playTone(320, t, 0.2, 'triangle', 0.1, 640);
+      AudioEngine.playTone(320, t, 0.22, 'triangle', 0.1, 640);
       AudioEngine.playTone(784, t + 0.08, 0.35, 'sine', 0.12);
     },
 
@@ -476,16 +477,17 @@ const AudioEngine = {
   updateUI() {
     const btnM = $('#btnMusic');
     const btnMute = $('#btnMute');
+    const wave = $('#audioWave');
     if (btnM) {
       btnM.innerHTML = AudioEngine.playing
-        ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg><span>Pause</span>`
+        ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg><span>Pause</span><span class="audio-wave" id="audioWave"><span></span><span></span><span></span></span>`
         : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Music</span>`;
       btnM.setAttribute('aria-pressed', AudioEngine.playing);
     }
     if (btnMute) {
       btnMute.innerHTML = AudioEngine.muted
         ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg><span>Unmute</span>`
-        : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg><span>Mute</span>`;
+        : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg><span>Mute</span>`;
       btnMute.setAttribute('aria-pressed', AudioEngine.muted);
     }
   },
@@ -1065,7 +1067,6 @@ $('#f-photos').onchange = e => {
   e.target.value = '';
 };
 
-// Dropzone support
 const dropzone = $('#dropzone');
 if (dropzone) {
   dropzone.onclick = () => $('#f-photos').click();
@@ -1131,20 +1132,17 @@ function updateLivePreview() {
 function updateStepperUI() {
   const cur = st.currentStep;
 
-  // Step Tabs
   $$('.step-tab').forEach(tab => {
     const stepNum = +tab.dataset.step;
     tab.classList.toggle('active', stepNum === cur);
     tab.classList.toggle('done', stepNum < cur);
   });
 
-  // Panes
   $$('.workshop-pane').forEach(pane => {
     const stepNum = +pane.dataset.step;
     pane.classList.toggle('active', stepNum === cur);
   });
 
-  // Footer Buttons
   const btnBack = $('#btnBackStep');
   const btnNext = $('#btnNextStep');
   const btnSkip = $('#btnSkipStep');
@@ -1152,7 +1150,6 @@ function updateStepperUI() {
 
   btnBack.style.visibility = cur > 1 ? 'visible' : 'hidden';
 
-  // Optional steps skip button
   const isOptionalStep = (cur === 2 || cur === 3 || cur === 4);
   btnSkip.style.display = isOptionalStep ? 'inline-flex' : 'none';
 
@@ -1218,14 +1215,12 @@ $$('.step-tab').forEach(tab => {
   };
 });
 
-// Character counter for letter
 $('#f-letter').oninput = e => {
   $('#letterCount').textContent = `${e.target.value.length} / 900`;
   updateLivePreview();
   saveDraft();
 };
 
-// Inputs live update and draft save
 ['#f-to', '#f-from', '#f-age', '#f-date', '#f-greeting', '#f-signoff'].forEach(sel => {
   const el = $(sel);
   if (el) {
@@ -1248,7 +1243,6 @@ for (let i = 1; i <= 5; i++) {
 
 $('#f-cd').onchange = saveDraft;
 
-// Tone Inspiration Chips
 const tonePrompts = {
   warm: [
     'You make every room warmer just by being in it.',
@@ -1293,7 +1287,6 @@ $$('#toneChips .chip').forEach(chip => {
       btn.dataset.prompt = p;
       btn.textContent = `"${p.slice(0, 32)}..."`;
       btn.onclick = () => {
-        // Find first empty note field among 1..5
         let filled = false;
         for (let i = 1; i <= 5; i++) {
           const el = $(`#f-note-${i}`);
@@ -1313,7 +1306,6 @@ $$('#toneChips .chip').forEach(chip => {
   };
 });
 
-// Initial prompt chips binding
 $$('.prompt-chip').forEach(btn => {
   btn.onclick = () => {
     const p = btn.dataset.prompt;
@@ -1333,7 +1325,6 @@ $$('.prompt-chip').forEach(btn => {
   };
 });
 
-// Theme selection cards
 $$('#themePicker .theme-card').forEach(card => {
   card.onclick = () => {
     $$('#themePicker .theme-card').forEach(c => c.classList.remove('active'));
@@ -1396,7 +1387,7 @@ $('#modalBtnPreview').onclick = () => {
 };
 
 /* ==============================================================
-   PARTICLE CANVAS (Confetti)
+   PARTICLE CANVAS (Confetti & Interactive Sparkles)
    ============================================================== */
 const canvas = $('#fx');
 const ctx = canvas.getContext('2d');
@@ -1417,6 +1408,7 @@ function launchConfetti() {
   const colors = ['#e8bf72', '#ff8fb1', '#8b6cff', '#fff5de', '#5aa7ff'];
   for (let i = 0; i < count; i++) {
     particles.push({
+      type: 'confetti',
       x: window.innerWidth / 2 + (Math.random() - 0.5) * window.innerWidth * 0.35,
       y: window.innerHeight * 0.45,
       vx: (Math.random() - 0.5) * 14,
@@ -1424,29 +1416,89 @@ function launchConfetti() {
       r: Math.random() * 4 + 2.5,
       a: Math.random() * Math.PI * 2,
       va: (Math.random() - 0.5) * 0.3,
-      c: colors[i % colors.length]
+      c: colors[i % colors.length],
+      life: 1
     });
   }
   if (!animFrameId) animFrameId = requestAnimationFrame(renderParticles);
 }
 
+// "A Little Birthday Magic" Pointer Sparkle Trail
+function spawnMagicSparkles(x, y, count = 4) {
+  if (RM) return;
+  const colors = ['#f5cf82', '#fff6d9', '#ff8fb1', '#8b6cff'];
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      type: 'sparkle',
+      x: x + (Math.random() - 0.5) * 16,
+      y: y + (Math.random() - 0.5) * 16,
+      vx: (Math.random() - 0.5) * 2.5,
+      vy: -Math.random() * 2 - 0.5,
+      r: Math.random() * 2.5 + 1.5,
+      a: Math.random() * Math.PI,
+      va: (Math.random() - 0.5) * 0.2,
+      c: colors[i % colors.length],
+      life: 1
+    });
+  }
+  if (!animFrameId) animFrameId = requestAnimationFrame(renderParticles);
+}
+
+let lastPointerTime = 0;
+window.addEventListener('pointermove', e => {
+  const now = performance.now();
+  if (now - lastPointerTime > 120) {
+    lastPointerTime = now;
+    spawnMagicSparkles(e.clientX, e.clientY, 1);
+  }
+}, { passive: true });
+
+window.addEventListener('pointerdown', e => {
+  spawnMagicSparkles(e.clientX, e.clientY, 5);
+}, { passive: true });
+
 function renderParticles() {
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-  particles = particles.filter(p => p.y < window.innerHeight + 20);
+
+  particles = particles.filter(p => {
+    if (p.type === 'confetti') {
+      return p.y < window.innerHeight + 20;
+    } else {
+      return p.life > 0.05;
+    }
+  });
 
   for (const p of particles) {
-    p.vy += 0.36;
-    p.vx *= 0.99;
-    p.x += p.vx;
-    p.y += p.vy;
-    p.a += p.va;
+    if (p.type === 'confetti') {
+      p.vy += 0.36;
+      p.vx *= 0.99;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.a += p.va;
 
-    ctx.save();
-    ctx.translate(p.x, p.y);
-    ctx.rotate(p.a);
-    ctx.fillStyle = p.c;
-    ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
-    ctx.restore();
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.a);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
+      ctx.restore();
+    } else if (p.type === 'sparkle') {
+      p.life *= 0.93;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.r *= 0.98;
+
+      ctx.save();
+      ctx.globalAlpha = p.life;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.a);
+      ctx.fillStyle = p.c;
+      // Draw 4-point sparkle star
+      ctx.beginPath();
+      ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
   }
 
   animFrameId = particles.length ? requestAnimationFrame(renderParticles) : 0;
@@ -1520,7 +1572,7 @@ function returnToWorkshop() {
   showStage('build');
 }
 
-/* Scene 1: Intro (The Wrapped Gift) */
+/* Scene 1: Intro (The Wrapped Gift & Ribbon Magic) */
 function initIntroScene() {
   const d = st.data;
   words($('#introH'), `${d.from} made a birthday surprise for ${d.to}`);
@@ -1588,7 +1640,7 @@ SceneHandlers.video = () => {
   VideoPlayer.renderFrame(0);
 };
 
-/* Scene 4: Cake & Wish Ritual */
+/* Scene 4: Cake & The Birthday Wish Ritual */
 SceneHandlers.cake = () => {
   const d = st.data;
   const candleCount = Math.max(1, Math.min(d.age || 5, 7));
@@ -1614,8 +1666,8 @@ SceneHandlers.cake = () => {
 
   st.ck = 0;
   words($('#cakeH'), `${d.to}, it’s your moment`);
-  $('#cakeP').textContent = 'Tap each glowing flame, or blow them all out together.';
-  $('#cakeBtn').textContent = 'Blow out the candles';
+  $('#cakeP').textContent = 'Make a wish in your heart, then blow out the candles.';
+  $('#cakeBtn').textContent = 'Make a Wish & Blow Candles ✨';
 };
 
 function extinguishCandle(candleEl) {
@@ -1624,11 +1676,23 @@ function extinguishCandle(candleEl) {
   candleEl.classList.add('out');
   AudioEngine.sfx.blow();
 
+  // Spawn delicate smoke puff SVG
+  const candleBox = candleEl.getBBox();
+  const NS = 'http://www.w3.org/2000/svg';
+  const smoke = document.createElementNS(NS, 'circle');
+  smoke.setAttribute('class', 'smoke-puff');
+  smoke.setAttribute('cx', candleBox.x + candleBox.width / 2);
+  smoke.setAttribute('cy', candleBox.y + 10);
+  smoke.setAttribute('r', 6);
+  smoke.setAttribute('fill', 'rgba(255,255,255,0.4)');
+  $('#cake').append(smoke);
+  setTimeout(() => smoke.remove(), 800);
+
   const remaining = $$('#candles .candle:not(.out)').length;
   if (remaining === 0) {
     st.ck = 1;
-    $('#cakeP').textContent = 'Close your eyes and make a wish...';
-    $('#cakeBtn').textContent = 'I made a wish ✨';
+    $('#cakeP').textContent = 'Wish made! Now cut the cake.';
+    $('#cakeBtn').textContent = 'Cut the Birthday Cake 🍰';
     AudioEngine.sfx.wax();
   }
 }
@@ -1650,23 +1714,24 @@ $('#candles').onkeydown = e => {
 
 $('#cakeBtn').onclick = () => {
   if (st.ck === 0) {
+    // Extinguish candles in sequence
     $$('#candles .candle').forEach((c, idx) => {
-      setTimeout(() => extinguishCandle(c), idx * 150);
+      setTimeout(() => extinguishCandle(c), idx * 160);
     });
   } else if (st.ck === 1) {
     st.ck = 2;
     launchConfetti();
     AudioEngine.sfx.party();
     flashBloom();
-    $('#cakeP').textContent = 'Your wish is in the stars. Now cut the cake!';
-    $('#cakeBtn').textContent = 'Cut the cake 🍰';
+    $('#cakeP').textContent = 'Your wish is in the stars!';
+    $('#cakeBtn').textContent = 'Continue Journey →';
   } else if (st.ck === 2) {
     AudioEngine.sfx.cut();
     nextScene();
   }
 };
 
-/* Scene 5: Floating Balloons & Balloon Trees */
+/* Scene 5: Floating Balloons, Balloon Trees & Discovered Tray */
 SceneHandlers.balloons = () => {
   const notes = (st.data.notes && st.data.notes.length)
     ? st.data.notes
@@ -1677,8 +1742,12 @@ SceneHandlers.balloons = () => {
     ];
 
   const sky = $('#sky');
+  const tray = $('#discoveredTray');
   sky.textContent = '';
+  tray.textContent = '';
+  tray.hidden = true;
   st.popped = 0;
+  st.discoveredNotes = [];
 
   words($('#balH'), `Notes in the sky for ${st.data.to}`);
   $('#balSub').textContent = 'Tap each floating balloon to release the secret message inside.';
@@ -1705,11 +1774,30 @@ SceneHandlers.balloons = () => {
       AudioEngine.sfx.pop();
       launchConfetti();
 
+      // Update active note card
       const noteCard = $('#noteCard');
       noteCard.textContent = noteText;
       noteCard.classList.remove('rev');
       void noteCard.offsetWidth;
       noteCard.classList.add('rev');
+
+      // Add to discovered tray
+      st.discoveredNotes.push({ text: noteText, index: idx + 1 });
+      tray.hidden = false;
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = 'discovered-pill cur';
+      pill.textContent = `💌 Note ${idx + 1}`;
+      pill.onclick = () => {
+        $$('.discovered-pill').forEach(p => p.classList.remove('cur'));
+        pill.classList.add('cur');
+        noteCard.textContent = noteText;
+        noteCard.classList.remove('rev');
+        void noteCard.offsetWidth;
+        noteCard.classList.add('rev');
+      };
+      $$('.discovered-pill').forEach(p => p.classList.remove('cur'));
+      tray.append(pill);
 
       st.popped++;
       if (st.popped === notes.length) {
@@ -1723,7 +1811,7 @@ SceneHandlers.balloons = () => {
 };
 $('#balBtn').onclick = nextScene;
 
-/* Scene 6: Memory Photo Gallery */
+/* Scene 6: Memory Photo Gallery (Flipbook & Lightbox) */
 SceneHandlers.gallery = () => {
   const slides = $('#slides');
   slides.textContent = '';
@@ -1793,7 +1881,7 @@ $('#galPrev').onclick = () => scrollSlide(-1);
 $('#galNext').onclick = () => scrollSlide(1);
 $('#galBtn').onclick = nextScene;
 
-/* Scene 7: The Wax-Sealed Letter */
+/* Scene 7: The Unfolding Letter */
 SceneHandlers.letter = () => {
   $('#env').hidden = false;
   $('#env').classList.remove('open');
@@ -1859,7 +1947,7 @@ $('#env').onkeydown = e => {
 };
 $('#letBtn').onclick = nextScene;
 
-/* Scene 8: Grand Finale */
+/* Scene 8: The Grand Finale */
 SceneHandlers.final = () => {
   const d = st.data;
   const ageStr = d.age ? `${d.age}` : '';
@@ -1884,6 +1972,7 @@ SceneHandlers.final = () => {
   flashBloom();
   AudioEngine.sfx.party();
   launchConfetti();
+  setTimeout(launchConfetti, 1400);
 };
 
 function getCurrentGiftLink() {
@@ -1924,6 +2013,28 @@ function initApp() {
   VideoPlayer.init();
   PhotoViewer.init();
 
+  // Gentle background fireflies
+  if (!RM) {
+    const ffContainer = $('#fireflies');
+    if (ffContainer) {
+      const count = LOW ? 5 : 10;
+      for (let i = 0; i < count; i++) {
+        const span = document.createElement('span');
+        span.className = 'firefly';
+        const size = Math.random() * 2.5 + 1.5;
+        span.style.cssText = `
+          left: ${Math.random() * 100}%;
+          bottom: ${-Math.random() * 20}px;
+          width: ${size}px;
+          height: ${size}px;
+          animation-duration: ${12 + Math.random() * 14}s;
+          animation-delay: ${-Math.random() * 16}s;
+        `;
+        ffContainer.append(span);
+      }
+    }
+  }
+
   const match = /^#draft=([\w-]+)$/.exec(location.hash);
 
   if (!match) {
@@ -1953,6 +2064,13 @@ function initApp() {
     showStage('error');
   }
 }
+
+// Pause heavy loops when page is hidden
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (VideoPlayer.isPlaying) VideoPlayer.pause();
+  }
+});
 
 window.addEventListener('hashchange', () => location.reload());
 

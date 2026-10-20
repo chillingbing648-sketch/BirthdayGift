@@ -9,6 +9,7 @@
   --gold: #e8bf72;
   --gold-hover: #f5cf82;
   --gold-subtle: rgba(232, 191, 114, 0.12);
+  --gold-glow: rgba(232, 191, 114, 0.35);
   --a1: #8b6cff;
   --a2: #ff7eb6;
   --serif: "Playfair Display", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
@@ -19,6 +20,8 @@
   --radius-full: 9999px;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
   --transition: all 0.25s ease;
 }
 
@@ -90,6 +93,23 @@ body {
   background: radial-gradient(ellipse 90% 55% at 50% 0%, rgba(38, 22, 60, 0.4), transparent 75%), var(--bg);
 }
 
+/* Subtle drifting fireflies / stars */
+.firefly {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff6d9;
+  box-shadow: 0 0 6px var(--gold);
+  pointer-events: none;
+  animation: floatFirefly linear infinite;
+}
+
+@keyframes floatFirefly {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  20% { opacity: 0.6; }
+  80% { opacity: 0.4; }
+  100% { transform: translateY(-80vh) scale(1.1); opacity: 0; }
+}
+
 /* Minimal Top Bar */
 #bar {
   position: fixed;
@@ -136,6 +156,9 @@ body {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .ctl button {
@@ -156,6 +179,34 @@ body {
 .ctl button:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.ctl button:active {
+  transform: scale(0.96);
+}
+
+/* Audio wave animation indicator */
+.audio-wave {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.audio-wave span {
+  width: 2px;
+  height: 4px;
+  background: var(--gold);
+  border-radius: 1px;
+  animation: wavePulse 1s ease-in-out infinite alternate;
+}
+
+.audio-wave span:nth-child(2) { animation-delay: 0.2s; height: 8px; }
+.audio-wave span:nth-child(3) { animation-delay: 0.4s; height: 12px; }
+
+@keyframes wavePulse {
+  to { height: 2px; opacity: 0.4; }
 }
 
 /* Layout Container & Stages */
@@ -180,7 +231,7 @@ body {
 
 .stage.on {
   display: flex;
-  animation: stageIn 0.4s ease both;
+  animation: stageIn 0.45s var(--ease-smooth) both;
 }
 
 .stage.left {
@@ -192,11 +243,11 @@ body {
 @keyframes stageIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px) scale(0.99);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -228,14 +279,6 @@ h1.hero {
   line-height: 1.5;
 }
 
-/* Restrained Card / Surface */
-.clean-card {
-  background: var(--bg-card);
-  border: 1px solid var(--bg-card-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-}
-
 /* Buttons */
 .btn {
   font: 600 0.94rem var(--sans);
@@ -261,7 +304,7 @@ h1.hero {
 }
 
 .btn:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .btn.gold {
@@ -312,7 +355,7 @@ h1.hero {
 }
 
 /* ==============================================================
-   FORM: MINIMAL OURMOMENTS-INSPIRED DESIGN
+   CREATOR WORKSHOP (Clean, Guided Form)
    ============================================================== */
 #s-build {
   max-width: 640px;
@@ -403,6 +446,7 @@ h1.hero {
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--ink);
+  transition: var(--transition);
 }
 
 .step-tab:hover {
@@ -444,6 +488,11 @@ h1.hero {
 
 .mini-box-icon {
   font-size: 1.4rem;
+  animation: floatMini 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes floatMini {
+  to { transform: translateY(-3px) rotate(4deg); }
 }
 
 .mini-box-details {
@@ -489,13 +538,14 @@ h1.hero {
   color: var(--mut);
 }
 
-/* Workshop Card */
+/* Workshop Form Card */
 .workshop-card {
   width: 100%;
   padding: clamp(20px, 4vw, 30px);
   background: var(--bg-card);
   border: 1px solid var(--bg-card-border);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .workshop-pane {
@@ -506,7 +556,7 @@ h1.hero {
 
 .workshop-pane.active {
   display: flex;
-  animation: paneIn 0.3s ease both;
+  animation: paneIn 0.3s var(--ease-smooth) both;
 }
 
 @keyframes paneIn {
@@ -624,7 +674,7 @@ textarea {
   font-weight: 500;
 }
 
-/* Clean Theme Swatches */
+/* Theme Swatches */
 .theme-picker {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -647,6 +697,7 @@ textarea {
 
 .theme-card:hover {
   border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
 }
 
 .theme-card.active {
@@ -737,7 +788,7 @@ textarea {
 }
 
 /* ==============================================================
-   SCENE 1: THE WRAPPED GIFT INTRO
+   SCENE 1: THE WRAPPED GIFT & RIBBON MAGIC
    ============================================================== */
 #s-intro {
   gap: 24px;
@@ -752,11 +803,11 @@ textarea {
   width: min(72vw, 240px);
   height: min(72vw, 240px);
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: transform 0.35s var(--ease-spring);
 }
 
 .gift-box-3d:hover {
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-5px) scale(1.02);
 }
 
 .gift-cube {
@@ -767,6 +818,7 @@ textarea {
   border: 1px solid rgba(232, 191, 114, 0.35);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   overflow: hidden;
+  transition: transform 0.6s ease, opacity 0.6s ease;
 }
 
 .gift-ribbon-v {
@@ -777,6 +829,7 @@ textarea {
   width: 36px;
   transform: translateX(-50%);
   background: var(--gold);
+  transition: transform 0.5s ease, opacity 0.5s ease;
 }
 
 .gift-ribbon-h {
@@ -787,6 +840,7 @@ textarea {
   height: 36px;
   transform: translateY(-50%);
   background: var(--gold);
+  transition: transform 0.5s ease, opacity 0.5s ease;
 }
 
 .gift-bow {
@@ -797,6 +851,12 @@ textarea {
   width: 80px;
   height: 80px;
   z-index: 5;
+  transition: transform 0.6s ease, opacity 0.6s ease;
+  animation: bowGentlyBreathe 3s ease-in-out infinite alternate;
+}
+
+@keyframes bowGentlyBreathe {
+  to { transform: translate(-50%, -50%) scale(1.05); }
 }
 
 .gift-tag {
@@ -829,31 +889,40 @@ textarea {
   font-size: 0.9rem;
   color: var(--gold);
   letter-spacing: 0.04em;
+  animation: pulseHint 2s ease-in-out infinite alternate;
 }
 
+@keyframes pulseHint {
+  from { opacity: 0.7; transform: translateY(0); }
+  to { opacity: 1; transform: translateY(-2px); }
+}
+
+/* Ribbon untying sequence */
 .gift-box-3d.unwrapping .gift-bow {
-  animation: bowFly 0.6s forwards ease-in;
+  animation: bowFly 0.65s var(--ease-spring) forwards;
 }
 
 .gift-box-3d.unwrapping .gift-ribbon-v,
 .gift-box-3d.unwrapping .gift-ribbon-h {
-  animation: ribbonSlide 0.5s forwards ease-in;
+  animation: ribbonSlide 0.55s ease forwards;
 }
 
 .gift-box-3d.unwrapping .gift-cube {
-  animation: cubeOpen 0.8s 0.2s forwards ease-out;
+  animation: cubeOpen 0.85s 0.2s var(--ease-smooth) forwards;
 }
 
 @keyframes bowFly {
-  to { transform: translate(-50%, -160%) scale(1.2); opacity: 0; }
+  to { transform: translate(-50%, -170%) scale(1.25) rotate(20deg); opacity: 0; }
 }
 
 @keyframes ribbonSlide {
-  to { transform: scale(0.1); opacity: 0; }
+  to { transform: scale(0.05); opacity: 0; }
 }
 
 @keyframes cubeOpen {
-  to { transform: scale(1.4); opacity: 0; }
+  0% { transform: scale(1); }
+  40% { transform: scale(1.06); filter: brightness(1.2); }
+  100% { transform: scale(1.4); opacity: 0; }
 }
 
 /* ==============================================================
@@ -879,6 +948,7 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: var(--transition);
 }
 
 .countdown-value {
@@ -951,6 +1021,7 @@ textarea {
   display: grid;
   place-items: center;
   transition: var(--transition);
+  box-shadow: 0 4px 18px var(--gold-glow);
 }
 
 .video-big-play:hover {
@@ -1076,6 +1147,12 @@ textarea {
 
 .candle .gl {
   fill: url(#glow);
+  transform-origin: 50% 50%;
+  animation: glowPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes glowPulse {
+  to { transform: scale(1.15); opacity: 0.85; }
 }
 
 .candle .fl {
@@ -1088,7 +1165,8 @@ textarea {
 .candle.out .fl,
 .candle.out .gl {
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transform: scale(0.2);
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
 @keyframes fl {
@@ -1097,11 +1175,22 @@ textarea {
   100% { transform: scale(1.05, 0.95) skewX(-3deg); }
 }
 
+/* Smoke puff particle */
+.smoke-puff {
+  animation: puffDissipate 0.8s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes puffDissipate {
+  0% { opacity: 0.7; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-26px) scale(2.2); }
+}
+
 /* ==============================================================
-   SCENE 5: BALLOONS & BALLOON TREES
+   SCENE 5: BALLOONS, BALLOON TREES & DISCOVERED TRAY
    ============================================================== */
 #s-balloons {
-  gap: 18px;
+  gap: 16px;
   position: relative;
   overflow: hidden;
 }
@@ -1148,7 +1237,7 @@ textarea {
 .sky {
   position: relative;
   width: 100%;
-  height: min(48vh, 380px);
+  height: min(44vh, 360px);
   overflow: visible;
   z-index: 2;
 }
@@ -1162,13 +1251,13 @@ textarea {
   height: 90px;
   border: 0;
   border-radius: 50% 50% 48% 48% / 45% 45% 55% 55%;
-  background: radial-gradient(circle at 35% 26%, rgba(255, 255, 255, 0.7), transparent 42%),
+  background: radial-gradient(circle at 35% 26%, rgba(255, 255, 255, 0.75), transparent 42%),
               hsl(var(--h) 75% 62%);
   box-shadow: inset -6px -8px 14px rgba(0, 0, 0, 0.2),
               0 10px 20px -8px hsl(var(--h) 75% 50% / 0.5);
   cursor: pointer;
   animation: bob 5s ease-in-out var(--d) infinite;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s var(--ease-spring);
 }
 
 .bl::before {
@@ -1182,7 +1271,7 @@ textarea {
 }
 
 .bl:hover {
-  transform: scale(1.06);
+  transform: scale(1.08) translateY(-4px);
 }
 
 .bl:disabled {
@@ -1210,15 +1299,50 @@ textarea {
   background: var(--bg-card);
   border: 1px solid var(--bg-card-border);
   border-radius: var(--radius-md);
+  transition: var(--transition);
 }
 
 .note.rev {
-  animation: noteFlip 0.4s ease both;
+  animation: noteFlip 0.4s var(--ease-smooth) both;
 }
 
 @keyframes noteFlip {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Discovered messages tray */
+.discovered-tray {
+  width: 100%;
+  max-width: 540px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 6px;
+  z-index: 4;
+}
+
+.discovered-pill {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--mut);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.discovered-pill:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.discovered-pill.cur {
+  background: var(--gold-subtle);
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
 /* ==============================================================
@@ -1249,6 +1373,7 @@ textarea {
   scroll-snap-align: center;
   position: relative;
   cursor: pointer;
+  transition: transform 0.4s ease;
 }
 
 .slide img {
@@ -1257,6 +1382,11 @@ textarea {
   aspect-ratio: 4 / 5;
   max-height: 52vh;
   object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.slide:hover img {
+  transform: scale(1.02);
 }
 
 .slide figcaption {
@@ -1323,7 +1453,7 @@ textarea {
 }
 
 .scale-in {
-  animation: dsScaleIn 0.3s ease both;
+  animation: dsScaleIn 0.3s var(--ease-smooth) both;
 }
 
 @keyframes dsScaleIn {
@@ -1380,6 +1510,7 @@ textarea {
 
 .photo-viewer__close:hover {
   background: rgba(255, 255, 255, 0.16);
+  transform: scale(1.05);
 }
 
 .photo-viewer__nav {
@@ -1476,7 +1607,7 @@ textarea {
   background: #342250;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   transform-origin: top;
-  transition: transform 0.65s ease;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 3;
 }
 
@@ -1495,7 +1626,7 @@ textarea {
   background: var(--gold);
   color: #2b1704;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
   z-index: 4;
   display: grid;
   place-items: center;
@@ -1504,6 +1635,7 @@ textarea {
 
 .env.open .seal {
   opacity: 0;
+  transform: scale(0.6);
 }
 
 .sheet {
@@ -1518,7 +1650,7 @@ textarea {
   font: italic 1.18rem/1.75 var(--serif);
   white-space: pre-wrap;
   position: relative;
-  animation: sheetRise 0.5s ease both;
+  animation: sheetRise 0.5s var(--ease-smooth) both;
 }
 
 @keyframes sheetRise {
@@ -1671,7 +1803,7 @@ body.bloom::after {
 }
 
 @keyframes flashBloom {
-  0% { opacity: 0.25; }
+  0% { opacity: 0.22; }
   100% { opacity: 0; }
 }
 
@@ -1713,7 +1845,7 @@ body.bloom::after {
 
   .balloon-tree {
     width: 30vw;
-    opacity: 0.5;
+    opacity: 0.45;
   }
 }
 

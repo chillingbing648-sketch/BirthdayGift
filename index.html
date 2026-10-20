@@ -8,8 +8,10 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body data-theme="violet">
-<!-- Restrained Background -->
-<div class="bg" aria-hidden="true"></div>
+<!-- Restrained Background with Fireflies -->
+<div class="bg" aria-hidden="true">
+  <div id="fireflies"></div>
+</div>
 
 <!-- Minimal Global Top Header -->
 <header id="bar" hidden>
@@ -23,6 +25,7 @@
     <button id="btnMusic" type="button" aria-pressed="false" aria-label="Toggle ambient soundtrack">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
       <span>Music</span>
+      <span class="audio-wave" id="audioWave" hidden><span></span><span></span><span></span></span>
     </button>
     <button id="btnMute" type="button" aria-pressed="false" aria-label="Toggle audio mute">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
@@ -501,9 +504,14 @@
       </svg>
     </div>
 
+    <!-- Active Note Card -->
     <div id="noteCard" class="note" role="status">
       <span>Tap a balloon floating above to discover a secret message.</span>
     </div>
+
+    <!-- Discovered Messages Tray -->
+    <div id="discoveredTray" class="discovered-tray" hidden></div>
+
     <button class="btn gold sm" id="balBtn" type="button" hidden>Continue Journey</button>
   </section>
 
@@ -618,7 +626,7 @@
   </div>
 </div>
 
-<!-- Canvas FX (Confetti) -->
+<!-- Canvas FX (Confetti & Interactive Sparkles) -->
 <canvas id="fx" aria-hidden="true"></canvas>
 
 <!-- Global Toast Notification -->
