@@ -6,13 +6,26 @@ Inspired by the clean, restrained design philosophy of [ourmoments.live](https:/
 
 ---
 
-## 🌟 Visual Philosophy: Soft Romantic & Minimal
+## 🌟 Visual Philosophy: Soft Romantic & Living Birthday Atmosphere
 
+- **Living Birthday Background**: A multi-layered animated atmosphere with pastel balloons drifting upward with swaying strings, delicate curled ribbons, 4-point twinkling stars, fluttering blossom petals, and miniature gift accents.
+- **Cinematic Depth Layers**: Softly blurred distant decorations (`.bg-layer-back`) layered with crisp, detailed midground elements (`.bg-layer-front`), staggered via negative animation delays so the page is immediately alive on load.
+- **Protected Central Clarity**: Background decorations concentrate along the outer flanks and corners, keeping the central form clean, calm, and readable without visual distraction.
 - **Soft Warm Ivory Canvas**: Warm ivory backdrop (`#FFF9F4`) paired with soft cream form surfaces (`#FFFEFC`), eliminating dark heavy backgrounds and harsh artificial neon glow.
 - **Warm Charcoal & Muted Mauve Typography**: Warm charcoal primary text (`#40343B`) and muted mauve secondary labels (`#91818D`) for effortless readability.
 - **Dusty Rose & Lavender Accents**: Delicate blush borders (`#EADDE3`) with gentle dusty rose (`#D98FA3`) and soft lavender (`#EAE2F2`) interactive accents.
 - **Editorial Typography**: Headings rendered in graceful **DM Serif Display** and **Lora**, paired with crisp, clean **DM Sans** for field labels, inputs, and controls.
 - **Balanced Two-Column Layout**: Strict two-column desktop form structure (`1fr 1fr`) with aligned labels, consistent 48px input heights, readable placeholders, and smooth mobile single-column stacking.
+
+---
+
+## ✨ Delightful Interaction-Driven Motion
+
+- **Page Entrance**: The form card and header gracefully fade and rise into view on load, greeted with a gentle cascade of golden and rose sparkles across the title.
+- **Celebration Tone Selection**: Selecting a celebration tone pill triggers an organic spring pulse and radiates a burst of micro-sparkles directly from the chip.
+- **Step Progression Flourish**: Advancing through form steps rewards the user with a focused confetti & sparkle flourish (`launchStepFlourish`) bursting upward from the Continue action.
+- **Grand Finale Celebration**: A multi-wave finale featuring a central fountain of confetti, floating celebration balloons on `#fx`, left and right confetti cannons, and radiant golden sparkle showers.
+- **Performance & Stacking Context**: All decorative background elements use `pointer-events: none` and hardware-accelerated CSS transforms (`translate3d`), with full accessibility under `prefers-reduced-motion: reduce`.
 
 ---
 

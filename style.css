@@ -137,13 +137,198 @@ body {
   outline: none;
 }
 
-/* Soft, Warm Birthday Background */
+/* ==============================================================
+   LIVING BIRTHDAY ATMOSPHERE & BACKGROUND SYSTEM
+   ============================================================== */
 .bg {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 90% 55% at 50% 0%, rgba(234, 226, 242, 0.5), transparent 75%), var(--bg);
+  overflow: hidden;
+  background-color: var(--bg);
+}
+
+.bg-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(245, 211, 200, 0.32) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(234, 226, 242, 0.40) 0%, transparent 45%),
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(255, 254, 252, 0.88) 0%, rgba(255, 249, 244, 0.35) 100%);
+  pointer-events: none;
+}
+
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bg-layer-back {
+  filter: blur(1.2px);
+  opacity: 0.35;
+}
+
+.bg-layer-front {
+  opacity: 0.85;
+}
+
+/* Background Animated Items */
+.bg-item {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform;
+}
+
+/* 🎈 Floating Balloons with Swaying Strings */
+.bg-balloon {
+  animation: floatBalloon var(--dur, 22s) cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation-delay: var(--delay, 0s);
+  bottom: -150px;
+}
+
+.bg-balloon .balloon-body-wrap {
+  animation: balloonSway var(--sway-dur, 5s) ease-in-out infinite alternate;
+  transform-origin: 50% 100%;
+}
+
+.bg-balloon .balloon-string {
+  animation: stringWave var(--sway-dur, 4s) ease-in-out infinite alternate;
+  transform-origin: 50% 0%;
+}
+
+@keyframes floatBalloon {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  6% {
+    opacity: var(--target-op, 0.75);
+  }
+  92% {
+    opacity: var(--target-op, 0.75);
+  }
+  100% {
+    transform: translate3d(var(--drift-x, 0px), calc(-100vh - 190px), 0);
+    opacity: 0;
+  }
+}
+
+@keyframes balloonSway {
+  0% { transform: rotate(-5deg) translateX(-6px); }
+  100% { transform: rotate(5deg) translateX(6px); }
+}
+
+@keyframes stringWave {
+  0% { transform: rotate(-7deg) scaleX(0.92); }
+  100% { transform: rotate(7deg) scaleX(1.08); }
+}
+
+/* 🎀 Delicate Curled Ribbons */
+.bg-ribbon {
+  animation: floatRibbon var(--dur, 28s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  bottom: -110px;
+}
+
+@keyframes floatRibbon {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scaleX(1);
+    opacity: 0;
+  }
+  8% { opacity: var(--target-op, 0.65); }
+  50% { transform: translate3d(var(--drift-x, 15px), calc(-50vh - 50px), 0) rotate(180deg) scaleX(0.7); }
+  92% { opacity: var(--target-op, 0.65); }
+  100% {
+    transform: translate3d(0, calc(-100vh - 130px), 0) rotate(360deg) scaleX(1);
+    opacity: 0;
+  }
+}
+
+/* ✨ Twinkling Stars */
+.bg-star {
+  animation: twinkleStar var(--dur, 4s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes twinkleStar {
+  0%, 100% {
+    transform: scale(0.65) rotate(0deg);
+    opacity: 0.18;
+  }
+  50% {
+    transform: scale(1.18) rotate(45deg);
+    opacity: 0.95;
+    filter: drop-shadow(0 0 5px rgba(232, 191, 114, 0.6));
+  }
+}
+
+/* 🌸 Drifting Blossom Petals */
+.bg-petal {
+  animation: floatPetal var(--dur, 25s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  bottom: -40px;
+}
+
+@keyframes floatPetal {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-15deg);
+    opacity: 0;
+  }
+  8% { opacity: var(--target-op, 0.65); }
+  25% { transform: translate3d(-16px, calc(-25vh - 10px), 0) rotate(25deg); }
+  50% { transform: translate3d(14px, calc(-50vh - 20px), 0) rotate(-20deg); }
+  75% { transform: translate3d(-12px, calc(-75vh - 30px), 0) rotate(30deg); }
+  92% { opacity: var(--target-op, 0.65); }
+  100% {
+    transform: translate3d(8px, calc(-100vh - 60px), 0) rotate(-10deg);
+    opacity: 0;
+  }
+}
+
+/* 💖 Tiny Floating Hearts */
+.bg-heart {
+  animation: floatHeart var(--dur, 26s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  bottom: -40px;
+}
+
+@keyframes floatHeart {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.85);
+    opacity: 0;
+  }
+  10% { opacity: var(--target-op, 0.6); }
+  50% { transform: translate3d(var(--drift-x, 12px), calc(-50vh - 20px), 0) scale(1.1); }
+  90% { opacity: var(--target-op, 0.6); }
+  100% {
+    transform: translate3d(0, calc(-100vh - 60px), 0) scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* 🎁 Delicate Gift Bows */
+.bg-bow {
+  animation: floatBow var(--dur, 30s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  bottom: -50px;
+}
+
+@keyframes floatBow {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-8deg);
+    opacity: 0;
+  }
+  10% { opacity: var(--target-op, 0.65); }
+  50% { transform: translate3d(var(--drift-x, -10px), calc(-50vh - 25px), 0) rotate(8deg); }
+  90% { opacity: var(--target-op, 0.65); }
+  100% {
+    transform: translate3d(0, calc(-100vh - 70px), 0) rotate(-8deg);
+    opacity: 0;
+  }
 }
 
 /* Subtle drifting fireflies / stars in soft rose */
@@ -435,6 +620,7 @@ h1.hero {
 .workshop-header {
   text-align: center;
   margin-bottom: 2px;
+  animation: headerEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .workshop-title {
@@ -489,6 +675,7 @@ h1.hero {
   padding: 6px;
   overflow-x: auto;
   scrollbar-width: none;
+  animation: navEntrance 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
 }
 .step-nav::-webkit-scrollbar { display: none; }
 
@@ -554,6 +741,7 @@ h1.hero {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
+  animation: previewEntrance 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
 }
 
 .live-preview-box {
@@ -634,6 +822,27 @@ h1.hero {
   border: 1.5px solid var(--bg-card-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
+  animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+}
+
+@keyframes headerEntrance {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes navEntrance {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes previewEntrance {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardEntrance {
+  0% { opacity: 0; transform: translateY(18px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .workshop-pane {
@@ -827,20 +1036,38 @@ textarea {
   font-size: 0.84rem;
   font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              background-color 0.22s ease,
+              border-color 0.22s ease,
+              box-shadow 0.22s ease,
+              color 0.22s ease;
 }
 
 .chip:hover {
   background: #F8EDF2;
   color: var(--ink);
   border-color: var(--accent);
+  transform: translateY(-1.5px);
+}
+
+.chip:active {
+  transform: translateY(1px) scale(0.97);
 }
 
 .chip.active {
-  background: rgba(217, 143, 163, 0.16);
+  background: rgba(217, 143, 163, 0.18);
   border-color: var(--accent);
   color: #B35E74;
   font-weight: 600;
+  transform: scale(1.04);
+  box-shadow: 0 0 0 3px rgba(217, 143, 163, 0.22), 0 4px 12px rgba(217, 143, 163, 0.18);
+  animation: chipSelectPulse 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes chipSelectPulse {
+  0% { transform: scale(0.95); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1.04); }
 }
 
 /* Theme Swatches */
@@ -2056,82 +2283,13 @@ body.bloom::after {
     width: 30vw;
     opacity: 0.45;
   }
-}
 
-/* Accessibility: Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-  pointer-events: none;
-}
-
-#toast.on {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
-/* Subtle Bloom */
-body.bloom::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: #fff;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 90;
-  animation: flashBloom 0.8s ease-out forwards;
-}
-
-@keyframes flashBloom {
-  0% { opacity: 0.22; }
-  100% { opacity: 0; }
-}
-
-/* Responsive Accommodations */
-@media (max-width: 600px) {
-  .stage {
-    padding: calc(64px + env(safe-area-inset-top)) 16px calc(32px + env(safe-area-inset-bottom));
-    gap: 16px;
-  }
-  
-  .step-tab {
-    padding: 6px 8px;
-    font-size: 0.76rem;
-  }
-
-  .step-tab span:not(.step-num) {
+  .bg-layer-back {
     display: none;
   }
 
-  .step-tab.active span:not(.step-num) {
-    display: inline;
-  }
-  
-  .theme-picker {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .row.between {
-    flex-direction: column-reverse;
-  }
-
-  .row.between > * {
-    width: 100%;
-  }
-
-  .countdown-box {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .balloon-tree {
-    width: 30vw;
-    opacity: 0.45;
+  .bg-item {
+    opacity: 0.42 !important;
   }
 }
 
@@ -2143,5 +2301,16 @@ body.bloom::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .bg-item,
+  .bg-balloon,
+  .bg-ribbon,
+  .bg-star,
+  .bg-petal,
+  .bg-heart,
+  .bg-bow,
+  .firefly {
+    display: none !important;
   }
 }

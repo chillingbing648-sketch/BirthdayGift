@@ -1230,6 +1230,8 @@ function goToStep(targetStep) {
 $('#btnNextStep').onclick = () => {
   if (!validateCurrentStep()) return;
   if (st.currentStep < st.totalSteps) {
+    const rect = $('#btnNextStep').getBoundingClientRect();
+    launchStepFlourish(rect.left + rect.width / 2, rect.top + rect.height / 2);
     goToStep(st.currentStep + 1);
   }
 };
@@ -1353,6 +1355,11 @@ $$('#toneChips .chip').forEach(chip => {
     st.tone = chip.dataset.tone;
     saveDraft();
 
+    const rect = chip.getBoundingClientRect();
+    if (rect.width > 0) {
+      spawnMagicSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2, 7);
+    }
+
     const prompts = tonePrompts[st.tone] || tonePrompts.warm;
     const container = $('#promptChips');
     container.textContent = '';
@@ -1446,7 +1453,293 @@ $('#modalBtnPreview').onclick = () => {
 };
 
 /* ==============================================================
-   PARTICLE CANVAS (Confetti & Interactive Sparkles)
+   LIVING BIRTHDAY ATMOSPHERE & BACKGROUND SYSTEM
+   ============================================================== */
+function createBgBalloonSvg(colorConfig) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const uid = 'bgbal_' + Math.random().toString(36).slice(2, 9);
+  svg.setAttribute('viewBox', '0 0 60 120');
+  svg.setAttribute('width', '44');
+  svg.setAttribute('height', '88');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.className.baseVal = 'bg-item bg-balloon';
+
+  svg.innerHTML = `
+    <defs>
+      <radialGradient id="${uid}" cx="35%" cy="30%" r="65%">
+        <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+        <stop offset="40%" stop-color="${colorConfig.mid}" stop-opacity="0.95"/>
+        <stop offset="100%" stop-color="${colorConfig.dark}" stop-opacity="0.95"/>
+      </radialGradient>
+    </defs>
+    <g class="balloon-body-wrap">
+      <path class="balloon-string" d="M30 60 Q26 80 32 95 T30 118" fill="none" stroke="rgba(145, 129, 141, 0.45)" stroke-width="1.3" stroke-linecap="round"/>
+      <path d="M30 6 C44 6 54 18 54 34 C54 50 38 60 30 60 C22 60 6 50 6 34 C6 18 16 6 30 6 Z" fill="url(#${uid})" filter="drop-shadow(0 3px 8px rgba(64,52,59,0.06))"/>
+      <polygon points="27,60 33,60 31,64 29,64" fill="${colorConfig.dark}" opacity="0.9"/>
+      <ellipse cx="22" cy="22" rx="4" ry="7" transform="rotate(-25 22 22)" fill="#FFFFFF" opacity="0.6"/>
+    </g>
+  `;
+  return svg;
+}
+
+function createBgRibbonSvg(color) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 34 84');
+  svg.setAttribute('width', '26');
+  svg.setAttribute('height', '68');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.className.baseVal = 'bg-item bg-ribbon';
+
+  svg.innerHTML = `
+    <path d="M17 3 C29 19 5 35 21 51 C33 65 9 76 17 81" fill="none" stroke="${color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+  `;
+  return svg;
+}
+
+function createBgStarSvg(color, size = 18) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('width', `${size}`);
+  svg.setAttribute('height', `${size}`);
+  svg.setAttribute('aria-hidden', 'true');
+  svg.className.baseVal = 'bg-item bg-star';
+
+  svg.innerHTML = `
+    <path d="M12 2 Q12 12 2 12 Q12 12 12 22 Q12 12 22 12 Q12 12 12 2 Z" fill="${color}"/>
+    <circle cx="12" cy="12" r="2.2" fill="#FFFFFF"/>
+  `;
+  return svg;
+}
+
+function createBgPetalSvg(color) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('width', '18');
+  svg.setAttribute('height', '18');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.className.baseVal = 'bg-item bg-petal';
+
+  svg.innerHTML = `
+    <path d="M12 2 C20 6 22 16 12 22 C2 16 4 6 12 2 Z" fill="${color}" opacity="0.7"/>
+  `;
+  return svg;
+}
+
+function createBgHeartSvg(color) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('width', '16');
+  svg.setAttribute('height', '16');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.className.baseVal = 'bg-item bg-heart';
+
+  svg.innerHTML = `
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="${color}" opacity="0.6"/>
+  `;
+  return svg;
+}
+
+function createBgBowSvg(color) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 28 24');
+  svg.setAttribute('width', '22');
+  svg.setAttribute('height', '19');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.className.baseVal = 'bg-item bg-bow';
+
+  svg.innerHTML = `
+    <path d="M14 12 C9 5 2 7 6 13 C9 15 13 13 14 12 Z" fill="${color}"/>
+    <path d="M14 12 C19 5 26 7 22 13 C19 15 15 13 14 12 Z" fill="${color}"/>
+    <circle cx="14" cy="12" r="2.2" fill="#B35E74"/>
+    <path d="M13 13 Q10 20 8 23 M15 13 Q18 20 20 23" fill="none" stroke="${color}" stroke-width="1.4" stroke-linecap="round"/>
+  `;
+  return svg;
+}
+
+function initLivingBackground() {
+  if (RM) return;
+
+  const bgBack = $('#bgLayerBack');
+  const bgFront = $('#bgLayerFront');
+  if (!bgBack || !bgFront) return;
+
+  bgBack.textContent = '';
+  bgFront.textContent = '';
+
+  const balloonPalettes = [
+    { mid: '#F5BAC9', dark: '#D98FA3' },
+    { mid: '#DFD3EE', dark: '#B7A5D2' },
+    { mid: '#FCE1D4', dark: '#F0A794' },
+    { mid: '#FEF3DD', dark: '#E8C88B' },
+    { mid: '#FAD1DC', dark: '#E0859D' }
+  ];
+
+  const ribbonColors = ['#D98FA3', '#CBB5E0', '#F5D3C8', '#E8C88B'];
+  const starColors = ['#E8BF72', '#D98FA3', '#B7A5D2', '#DCA357'];
+  const petalColors = ['#FAD1DC', '#FCE1D4', '#EAE2F2'];
+  const bowColors = ['#D98FA3', '#E8BF72', '#B7A5D2'];
+
+  const isMobile = window.innerWidth <= 640;
+
+  function getSideLeft(index, total) {
+    const isLeft = index % 2 === 0;
+    if (isMobile) {
+      return isLeft
+        ? (2 + Math.random() * 10)
+        : (86 + Math.random() * 10);
+    }
+    return isLeft
+      ? (1.5 + (Math.random() * 18))
+      : (79 + (Math.random() * 18));
+  }
+
+  // 1. Distant Back Layer (larger, slow, lower opacity, subtle blur)
+  const backBalloonCount = isMobile ? 0 : (LOW ? 2 : 4);
+  for (let i = 0; i < backBalloonCount; i++) {
+    const el = createBgBalloonSvg(balloonPalettes[i % balloonPalettes.length]);
+    const dur = 32 + Math.random() * 14;
+    const swayDur = 5 + Math.random() * 3;
+    const delay = -(Math.random() * dur);
+    const left = getSideLeft(i, backBalloonCount);
+    const driftX = (Math.random() - 0.5) * 30;
+
+    el.style.left = `${left}%`;
+    el.style.setProperty('--dur', `${dur}s`);
+    el.style.setProperty('--delay', `${delay}s`);
+    el.style.setProperty('--sway-dur', `${swayDur}s`);
+    el.style.setProperty('--drift-x', `${driftX}px`);
+    el.style.setProperty('--target-op', '0.28');
+    el.style.transform = `scale(${1.25 + Math.random() * 0.25})`;
+
+    bgBack.appendChild(el);
+  }
+
+  if (!isMobile) {
+    for (let i = 0; i < 2; i++) {
+      const el = createBgRibbonSvg(ribbonColors[i % ribbonColors.length]);
+      const dur = 36 + Math.random() * 12;
+      const delay = -(Math.random() * dur);
+      const left = i === 0 ? (3 + Math.random() * 12) : (84 + Math.random() * 12);
+      el.style.left = `${left}%`;
+      el.style.setProperty('--dur', `${dur}s`);
+      el.style.setProperty('--delay', `${delay}s`);
+      el.style.setProperty('--target-op', '0.22');
+      el.style.transform = `scale(1.3)`;
+      bgBack.appendChild(el);
+    }
+  }
+
+  // 2. Foreground / Midground Layer (crisp, detailed, varied elements)
+  const frontBalloonCount = isMobile ? 4 : (LOW ? 5 : 7);
+  for (let i = 0; i < frontBalloonCount; i++) {
+    const el = createBgBalloonSvg(balloonPalettes[i % balloonPalettes.length]);
+    const dur = 20 + Math.random() * 10;
+    const swayDur = 3.5 + Math.random() * 2;
+    const delay = -(Math.random() * dur);
+    const left = getSideLeft(i, frontBalloonCount);
+    const driftX = (Math.random() - 0.5) * 24;
+
+    el.style.left = `${left}%`;
+    el.style.setProperty('--dur', `${dur}s`);
+    el.style.setProperty('--delay', `${delay}s`);
+    el.style.setProperty('--sway-dur', `${swayDur}s`);
+    el.style.setProperty('--drift-x', `${driftX}px`);
+    el.style.setProperty('--target-op', isMobile ? '0.5' : '0.78');
+    el.style.transform = `scale(${0.85 + Math.random() * 0.25})`;
+
+    bgFront.appendChild(el);
+  }
+
+  // Curled Ribbons
+  const ribbonCount = isMobile ? 2 : (LOW ? 2 : 4);
+  for (let i = 0; i < ribbonCount; i++) {
+    const el = createBgRibbonSvg(ribbonColors[i % ribbonColors.length]);
+    const dur = 24 + Math.random() * 10;
+    const delay = -(Math.random() * dur);
+    const left = getSideLeft(i, ribbonCount);
+    el.style.left = `${left}%`;
+    el.style.setProperty('--dur', `${dur}s`);
+    el.style.setProperty('--delay', `${delay}s`);
+    el.style.setProperty('--drift-x', `${(Math.random() - 0.5) * 20}px`);
+    el.style.setProperty('--target-op', isMobile ? '0.45' : '0.68');
+    bgFront.appendChild(el);
+  }
+
+  // Twinkling Sparkle Stars
+  const starCount = isMobile ? 4 : (LOW ? 6 : 10);
+  for (let i = 0; i < starCount; i++) {
+    const el = createBgStarSvg(starColors[i % starColors.length], 16 + Math.floor(Math.random() * 8));
+    const dur = 3 + Math.random() * 3;
+    const delay = -(Math.random() * dur);
+    const left = getSideLeft(i, starCount);
+    const top = 8 + Math.random() * 84;
+
+    el.style.left = `${left}%`;
+    el.style.top = `${top}%`;
+    el.style.setProperty('--dur', `${dur}s`);
+    el.style.setProperty('--delay', `${delay}s`);
+    bgFront.appendChild(el);
+  }
+
+  // Petals
+  const petalCount = isMobile ? 2 : (LOW ? 3 : 5);
+  for (let i = 0; i < petalCount; i++) {
+    const el = createBgPetalSvg(petalColors[i % petalColors.length]);
+    const dur = 22 + Math.random() * 8;
+    const delay = -(Math.random() * dur);
+    const left = getSideLeft(i, petalCount);
+    el.style.left = `${left}%`;
+    el.style.setProperty('--dur', `${dur}s`);
+    el.style.setProperty('--delay', `${delay}s`);
+    el.style.setProperty('--target-op', isMobile ? '0.45' : '0.7');
+    bgFront.appendChild(el);
+  }
+
+  // Tiny Hearts & Gift Bows
+  if (!isMobile) {
+    for (let i = 0; i < 3; i++) {
+      const el = createBgHeartSvg(ribbonColors[i % ribbonColors.length]);
+      const dur = 24 + Math.random() * 8;
+      const delay = -(Math.random() * dur);
+      const left = getSideLeft(i, 3);
+      el.style.left = `${left}%`;
+      el.style.setProperty('--dur', `${dur}s`);
+      el.style.setProperty('--delay', `${delay}s`);
+      el.style.setProperty('--drift-x', `${(Math.random() - 0.5) * 16}px`);
+      el.style.setProperty('--target-op', '0.6');
+      bgFront.appendChild(el);
+    }
+
+    for (let i = 0; i < 2; i++) {
+      const el = createBgBowSvg(bowColors[i % bowColors.length]);
+      const dur = 28 + Math.random() * 8;
+      const delay = -(Math.random() * dur);
+      const left = i === 0 ? (4 + Math.random() * 12) : (82 + Math.random() * 12);
+      el.style.left = `${left}%`;
+      el.style.setProperty('--dur', `${dur}s`);
+      el.style.setProperty('--delay', `${delay}s`);
+      el.style.setProperty('--drift-x', `${(Math.random() - 0.5) * 16}px`);
+      el.style.setProperty('--target-op', '0.65');
+      bgFront.appendChild(el);
+    }
+  }
+}
+
+function triggerPageEntranceSparkles() {
+  if (RM) return;
+  setTimeout(() => {
+    const card = $('.workshop-card');
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    if (rect.width > 0) {
+      spawnMagicSparkles(rect.left + rect.width * 0.3, rect.top + 20, 5);
+      setTimeout(() => spawnMagicSparkles(rect.left + rect.width * 0.7, rect.top + 20, 5), 180);
+    }
+  }, 250);
+}
+
+/* ==============================================================
+   PARTICLE CANVAS (Confetti, Sparkles & Grand Finale Flourish)
    ============================================================== */
 const canvas = $('#fx');
 const ctx = canvas.getContext('2d');
@@ -1480,6 +1773,110 @@ function launchConfetti() {
     });
   }
   if (!animFrameId) animFrameId = requestAnimationFrame(renderParticles);
+}
+
+// Subtle confetti flourish on step transition
+function launchStepFlourish(x, y) {
+  if (RM) return;
+  const count = LOW ? 10 : 18;
+  const colors = ['#D98FA3', '#EAE2F2', '#E0859D', '#FCE6CA', '#F5D3C8', '#FFFFFF'];
+  for (let i = 0; i < count; i++) {
+    const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.5;
+    const speed = Math.random() * 8 + 4;
+    particles.push({
+      type: 'confetti',
+      x: x + (Math.random() - 0.5) * 20,
+      y: y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      r: Math.random() * 3 + 2,
+      a: Math.random() * Math.PI * 2,
+      va: (Math.random() - 0.5) * 0.25,
+      c: colors[i % colors.length],
+      life: 1
+    });
+  }
+  spawnMagicSparkles(x, y - 8, 6);
+  if (!animFrameId) animFrameId = requestAnimationFrame(renderParticles);
+}
+
+// Floating celebratory balloons on canvas for grand finale
+function launchCelebrationBalloons() {
+  if (RM) return;
+  const count = LOW ? 3 : 6;
+  const colors = [
+    { fill: '#F2BAC9', knot: '#C27387' },
+    { fill: '#DFD3EE', knot: '#9E89BD' },
+    { fill: '#FCE1D4', knot: '#DE8974' },
+    { fill: '#FEF3DD', knot: '#DCA357' },
+    { fill: '#E8A2B5', knot: '#B35E74' }
+  ];
+  for (let i = 0; i < count; i++) {
+    const col = colors[i % colors.length];
+    particles.push({
+      type: 'balloon',
+      x: window.innerWidth * (0.15 + (i / count) * 0.7) + (Math.random() - 0.5) * 50,
+      y: window.innerHeight + 50 + Math.random() * 90,
+      vy: -(Math.random() * 1.8 + 2.4),
+      r: Math.random() * 6 + 18,
+      a: Math.random() * Math.PI,
+      sway: Math.random() * Math.PI * 2,
+      c: col.fill,
+      knotColor: col.knot,
+      life: 1
+    });
+  }
+  if (!animFrameId) animFrameId = requestAnimationFrame(renderParticles);
+}
+
+// Side confetti cannons
+function launchSideCannons() {
+  if (RM) return;
+  const count = LOW ? 18 : 32;
+  const colors = ['#D98FA3', '#EAE2F2', '#E0859D', '#FCE6CA', '#DCA357', '#FFFFFF', '#F5D3C8'];
+  for (let i = 0; i < count; i++) {
+    const angleL = -Math.PI / 4 + (Math.random() - 0.5) * 0.5;
+    const speedL = Math.random() * 11 + 8;
+    particles.push({
+      type: 'confetti',
+      x: -10,
+      y: window.innerHeight * 0.75,
+      vx: Math.cos(angleL) * speedL,
+      vy: Math.sin(angleL) * speedL,
+      r: Math.random() * 4 + 2.5,
+      a: Math.random() * Math.PI * 2,
+      va: (Math.random() - 0.5) * 0.3,
+      c: colors[i % colors.length],
+      life: 1
+    });
+
+    const angleR = -3 * Math.PI / 4 + (Math.random() - 0.5) * 0.5;
+    const speedR = Math.random() * 11 + 8;
+    particles.push({
+      type: 'confetti',
+      x: window.innerWidth + 10,
+      y: window.innerHeight * 0.75,
+      vx: Math.cos(angleR) * speedR,
+      vy: Math.sin(angleR) * speedR,
+      r: Math.random() * 4 + 2.5,
+      a: Math.random() * Math.PI * 2,
+      va: (Math.random() - 0.5) * 0.3,
+      c: colors[(i + 2) % colors.length],
+      life: 1
+    });
+  }
+  if (!animFrameId) animFrameId = requestAnimationFrame(renderParticles);
+}
+
+// Grand Finale sequence (timed celebratory layers)
+function launchGrandFinale() {
+  launchConfetti();
+  launchCelebrationBalloons();
+  setTimeout(launchSideCannons, 450);
+  setTimeout(() => {
+    launchConfetti();
+    spawnMagicSparkles(window.innerWidth / 2, window.innerHeight * 0.35, 12);
+  }, 1400);
 }
 
 // "A Little Birthday Magic" Pointer Sparkle Trail
@@ -1522,6 +1919,8 @@ function renderParticles() {
   particles = particles.filter(p => {
     if (p.type === 'confetti') {
       return p.y < window.innerHeight + 20;
+    } else if (p.type === 'balloon') {
+      return p.y > -80 && p.life > 0.05;
     } else {
       return p.life > 0.05;
     }
@@ -1541,6 +1940,46 @@ function renderParticles() {
       ctx.fillStyle = p.c;
       ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
       ctx.restore();
+    } else if (p.type === 'balloon') {
+      p.y += p.vy;
+      p.x += Math.sin(p.a) * 0.7;
+      p.a += 0.03;
+      p.sway += 0.04;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(Math.sin(p.sway) * 0.07);
+
+      // String
+      ctx.beginPath();
+      ctx.moveTo(0, p.r * 1.3);
+      ctx.quadraticCurveTo(Math.sin(p.sway) * 8, p.r * 2.2, 0, p.r * 3.2);
+      ctx.strokeStyle = 'rgba(145, 129, 141, 0.45)';
+      ctx.lineWidth = 1.3;
+      ctx.stroke();
+
+      // Balloon body
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.r, p.r * 1.3, 0, 0, Math.PI * 2);
+      ctx.fillStyle = p.c;
+      ctx.fill();
+
+      // Specular highlight
+      ctx.beginPath();
+      ctx.ellipse(-p.r * 0.35, -p.r * 0.45, p.r * 0.22, p.r * 0.42, -0.4, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+      ctx.fill();
+
+      // Knot
+      ctx.beginPath();
+      ctx.moveTo(-3, p.r * 1.3);
+      ctx.lineTo(3, p.r * 1.3);
+      ctx.lineTo(0, p.r * 1.45);
+      ctx.closePath();
+      ctx.fillStyle = p.knotColor || p.c;
+      ctx.fill();
+
+      ctx.restore();
     } else if (p.type === 'sparkle') {
       p.life *= 0.93;
       p.x += p.vx;
@@ -1552,7 +1991,6 @@ function renderParticles() {
       ctx.translate(p.x, p.y);
       ctx.rotate(p.a);
       ctx.fillStyle = p.c;
-      // Draw 4-point sparkle star
       ctx.beginPath();
       ctx.arc(0, 0, p.r, 0, Math.PI * 2);
       ctx.fill();
@@ -2030,8 +2468,7 @@ SceneHandlers.final = () => {
 
   flashBloom();
   AudioEngine.sfx.party();
-  launchConfetti();
-  setTimeout(launchConfetti, 1400);
+  launchGrandFinale();
 };
 
 function getCurrentGiftLink() {
@@ -2051,7 +2488,7 @@ $('#fCopy').onclick = () => {
   if (l) copyText(l);
 };
 $('#fMore').onclick = () => {
-  launchConfetti();
+  launchGrandFinale();
   AudioEngine.sfx.party();
 };
 $('#fReplay').onclick = () => gotoScene(0);
@@ -2071,6 +2508,7 @@ $('#errMake').onclick = createNewGift;
 function initApp() {
   VideoPlayer.init();
   PhotoViewer.init();
+  initLivingBackground();
 
   // Gentle background fireflies
   if (!RM) {
@@ -2102,6 +2540,7 @@ function initApp() {
     loadDraft();
     updateStepperUI();
     updateLivePreview();
+    triggerPageEntranceSparkles();
     return;
   }
 
