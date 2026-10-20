@@ -1,6 +1,6 @@
 :root {
   --bg: #090818;
-  --bg-card: rgba(22, 16, 44, 0.72);
+  --bg-card: rgba(22, 16, 44, 0.75);
   --bg-card-border: rgba(244, 201, 120, 0.22);
   --ink: #fbf7ff;
   --mut: #b8afce;
@@ -16,29 +16,31 @@
   --radius-md: 16px;
   --radius-lg: 24px;
   --radius-full: 9999px;
-  --shadow-box: 0 20px 48px -12px rgba(0, 0, 0, 0.65);
+  --shadow-box: 0 24px 50px -12px rgba(0, 0, 0, 0.7);
   --transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-m: 0.35s;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 [data-theme="rose"] {
   --bg: #120914;
   --a1: #ff8fb1;
   --a2: #f4c978;
-  --bg-card: rgba(36, 16, 28, 0.72);
+  --bg-card: rgba(36, 16, 28, 0.75);
 }
 
 [data-theme="ocean"] {
   --bg: #060b1c;
   --a1: #5aa7ff;
   --a2: #7ef0d4;
-  --bg-card: rgba(12, 22, 48, 0.72);
+  --bg-card: rgba(12, 22, 48, 0.75);
 }
 
 [data-theme="amber"] {
   --bg: #130a04;
   --a1: #f7a044;
   --a2: #ff5b79;
-  --bg-card: rgba(36, 18, 10, 0.72);
+  --bg-card: rgba(36, 18, 10, 0.75);
 }
 
 * {
@@ -139,9 +141,9 @@ body {
   inset: 0 0 auto;
   z-index: 50;
   padding: calc(10px + env(safe-area-inset-top)) 16px 8px;
-  background: linear-gradient(180deg, rgba(9, 8, 24, 0.85) 0%, rgba(9, 8, 24, 0) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(9, 8, 24, 0.88) 0%, rgba(9, 8, 24, 0) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .prog {
@@ -149,7 +151,7 @@ body {
   background: rgba(255, 255, 255, 0.12);
   border-radius: 999px;
   overflow: hidden;
-  max-width: 720px;
+  max-width: 760px;
   margin: 0 auto;
   box-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
@@ -169,16 +171,20 @@ body {
   justify-content: flex-end;
   align-items: center;
   gap: 10px;
-  max-width: 720px;
+  max-width: 760px;
   margin: 8px auto 0;
 }
 
 .ctl-badge {
-  font-size: 0.8rem;
-  color: var(--mut);
+  font-size: 0.82rem;
+  color: var(--gold);
   margin-right: auto;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .ctl button {
@@ -217,14 +223,14 @@ body {
 .stage {
   display: none;
   min-height: 100dvh;
-  max-width: 760px;
+  max-width: 840px;
   margin: 0 auto;
   padding: calc(76px + env(safe-area-inset-top)) 20px calc(48px + env(safe-area-inset-bottom));
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 22px;
+  gap: 24px;
   position: relative;
 }
 
@@ -389,13 +395,13 @@ h1.hero {
    ============================================================== */
 #s-build {
   max-width: 820px;
-  gap: 24px;
+  gap: 22px;
   padding-top: calc(36px + env(safe-area-inset-top));
 }
 
 .workshop-header {
   text-align: center;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .workshop-title {
@@ -405,9 +411,35 @@ h1.hero {
 
 .workshop-subtitle {
   color: var(--mut);
-  font-size: 1rem;
+  font-size: 0.98rem;
   max-width: 580px;
   margin: 0 auto;
+}
+
+/* Draft status indicator */
+.draft-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--gold);
+  padding: 4px 12px;
+  background: rgba(244, 201, 120, 0.08);
+  border-radius: var(--radius-full);
+  margin-top: 6px;
+}
+
+.draft-reset-btn {
+  background: none;
+  border: 0;
+  color: var(--mut);
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.draft-reset-btn:hover {
+  color: #ff8fa3;
 }
 
 /* Workshop Steps Indicator Bar */
@@ -727,24 +759,6 @@ textarea {
   flex: none;
 }
 
-/* Balloon Notes Editor */
-.notes-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.note-input-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.note-badge {
-  font-size: 1.3rem;
-  flex: none;
-}
-
 /* Live Miniature Gift Preview Widget */
 .live-preview-drawer {
   background: rgba(14, 10, 32, 0.65);
@@ -1021,7 +1035,175 @@ textarea {
 }
 
 /* ==============================================================
-   SCENE 3 — CAKE & WISH RITUAL
+   SCENE 3 — CINEMATIC VIDEO PLAYER & BIRTHDAY FILM
+   ============================================================== */
+#s-video {
+  gap: 22px;
+}
+
+.video-player-container {
+  width: 100%;
+  max-width: 740px;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(244, 201, 120, 0.25);
+  background: #06040e;
+}
+
+#videoCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.video-overlay-poster {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(32, 18, 54, 0.85) 0%, rgba(6, 4, 14, 0.95) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  cursor: pointer;
+  z-index: 10;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.video-overlay-poster.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.video-big-play {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: var(--gold-grad);
+  color: #2b1704;
+  border: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 12px 36px var(--gold-glow);
+  transition: var(--transition);
+}
+
+.video-big-play:hover {
+  transform: scale(1.1);
+  box-shadow: 0 16px 44px var(--gold);
+}
+
+.video-poster-title {
+  font: 500 1.25rem var(--serif);
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+
+.video-controls-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, transparent 0%, rgba(6, 4, 14, 0.95) 100%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 12;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.video-player-container:hover .video-controls-bar,
+.video-player-container:focus-within .video-controls-bar,
+.video-controls-bar.active {
+  opacity: 1;
+}
+
+.video-ctl-btn {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  transition: var(--transition);
+}
+
+.video-ctl-btn:hover {
+  color: var(--gold);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.video-timeline-wrap {
+  flex: 1;
+  position: relative;
+  height: 18px;
+  display: flex;
+  align-items: center;
+}
+
+#vidTimeline {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  z-index: 2;
+}
+
+#vidTimeline::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+  cursor: pointer;
+}
+
+.video-time-display {
+  font-size: 0.78rem;
+  color: var(--mut);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.video-vol-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#vidVolume {
+  width: 60px;
+  height: 4px;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+}
+
+#vidVolume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+/* ==============================================================
+   SCENE 4 — CAKE & WISH RITUAL
    ============================================================== */
 #s-cake {
   gap: 20px;
@@ -1075,22 +1257,56 @@ textarea {
   100% { transform: scale(1.05, 0.95) skewX(-4deg); }
 }
 
-/* Smoke puff animation when extinguished */
-.smoke-puff {
-  animation: puffRise 0.8s forwards ease-out;
-  pointer-events: none;
-}
-
-@keyframes puffRise {
-  from { opacity: 0.7; transform: translateY(0) scale(1); }
-  to { opacity: 0; transform: translateY(-24px) scale(2.2); }
-}
-
 /* ==============================================================
-   SCENE 4 — FLOATING BALLOONS
+   SCENE 5 — BALLOON TREES & WHISPERED WISHES
    ============================================================== */
 #s-balloons {
   gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.balloon-scene-stage {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Decorative SVG Balloon Trees flanking sides */
+.balloon-tree {
+  position: absolute;
+  bottom: 0;
+  width: min(28vw, 190px);
+  height: auto;
+  pointer-events: none;
+  z-index: 1;
+  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.5));
+}
+
+.balloon-tree-left {
+  left: -20px;
+  transform-origin: bottom center;
+  animation: swayTreeLeft 7s ease-in-out infinite alternate;
+}
+
+.balloon-tree-right {
+  right: -20px;
+  transform-origin: bottom center;
+  animation: swayTreeRight 8s ease-in-out infinite alternate;
+}
+
+@keyframes swayTreeLeft {
+  0% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg) translateY(-4px); }
+  100% { transform: rotate(-2deg); }
+}
+
+@keyframes swayTreeRight {
+  0% { transform: rotate(2deg); }
+  50% { transform: rotate(-2deg) translateY(-5px); }
+  100% { transform: rotate(2deg); }
 }
 
 .sky {
@@ -1098,6 +1314,7 @@ textarea {
   width: 100%;
   height: min(52vh, 420px);
   overflow: visible;
+  z-index: 2;
 }
 
 .bl {
@@ -1109,8 +1326,8 @@ textarea {
   height: 98px;
   border: 0;
   border-radius: 50% 50% 48% 48% / 45% 45% 55% 55%;
-  background: radial-gradient(circle at 35% 26%, rgba(255, 255, 255, 0.7), transparent 40%),
-              hsl(var(--h) 80% 64%);
+  background: radial-gradient(circle at 35% 26%, rgba(255, 255, 255, 0.75), transparent 42%),
+              hsl(var(--h) 82% 64%);
   box-shadow: inset -8px -10px 18px rgba(0, 0, 0, 0.25),
               0 14px 28px -10px hsl(var(--h) 80% 60% / 0.6);
   cursor: pointer;
@@ -1157,6 +1374,7 @@ textarea {
   display: grid;
   place-items: center;
   position: relative;
+  z-index: 4;
   transition: var(--transition);
 }
 
@@ -1170,7 +1388,7 @@ textarea {
 }
 
 /* ==============================================================
-   SCENE 5 — MEMORY PHOTO GALLERY
+   SCENE 6 — MEMORY PHOTO GALLERY & PHOTOVIEWER LIGHTBOX
    ============================================================== */
 #s-gallery {
   gap: 20px;
@@ -1198,6 +1416,7 @@ textarea {
   background: #141028;
   border-radius: var(--radius-lg);
   overflow: hidden;
+  cursor: pointer;
 }
 
 .slide img {
@@ -1207,6 +1426,10 @@ textarea {
   max-height: 56vh;
   object-fit: cover;
   transition: transform 0.6s ease;
+}
+
+.slide:hover img {
+  transform: scale(1.03);
 }
 
 .slide figcaption {
@@ -1224,8 +1447,187 @@ textarea {
   display: none;
 }
 
+.slide-view-hint {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(6, 4, 14, 0.65);
+  color: var(--gold);
+  border: 1px solid rgba(244, 201, 120, 0.3);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
 /* ==============================================================
-   SCENE 6 — THE WAX-SEALED LETTER
+   PHOTOVIEWER (Match My Little Universe Quality)
+   ============================================================== */
+.photo-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: radial-gradient(ellipse 80% 70% at 50% 46%, rgba(20, 26, 50, 0.75), rgba(3, 4, 8, 0.96));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(64px, env(safe-area-inset-top, 0px) + 52px)
+           max(16px, env(safe-area-inset-right, 0px) + 16px)
+           max(24px, env(safe-area-inset-bottom, 0px) + 16px)
+           max(16px, env(safe-area-inset-left, 0px) + 16px);
+  animation: pvFadeIn 0.3s ease both;
+}
+
+@keyframes pvFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.photo-viewer__figure {
+  width: min(100%, 920px);
+  max-height: calc(100dvh - 110px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  outline: none;
+}
+
+.scale-in {
+  animation: dsScaleIn var(--dur-m) var(--ease-out) both;
+}
+
+@keyframes dsScaleIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.965); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+.photo-viewer__img-wrap {
+  position: relative;
+  max-width: 100%;
+  max-height: min(76dvh, 760px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.photo-viewer__figure img {
+  width: auto;
+  max-width: 100%;
+  max-height: min(76dvh, 760px);
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transition: transform 0.25s ease-out;
+  user-select: none;
+}
+
+.photo-viewer__figure figcaption {
+  font: italic 1.25rem/1.5 var(--serif);
+  color: var(--ink);
+  margin-top: 14px;
+  text-align: center;
+  max-width: 600px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+
+.photo-viewer__close {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top, 0px) + 12px);
+  right: max(16px, env(safe-area-inset-right, 0px) + 12px);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  transition: var(--transition);
+  z-index: 205;
+}
+
+.photo-viewer__close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.photo-viewer__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(22, 16, 44, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+  transition: var(--transition);
+  z-index: 205;
+}
+
+.photo-viewer__nav:hover {
+  background: rgba(35, 27, 72, 0.9);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.photo-viewer__nav--prev {
+  left: max(16px, env(safe-area-inset-left, 0px) + 16px);
+}
+
+.photo-viewer__nav--next {
+  right: max(16px, env(safe-area-inset-right, 0px) + 16px);
+}
+
+.photo-viewer__zoom-controls {
+  position: absolute;
+  bottom: max(16px, env(safe-area-inset-bottom, 0px) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(18, 14, 38, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 205;
+  backdrop-filter: blur(10px);
+}
+
+.photo-viewer__zoom-btn {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: grid;
+  place-items: center;
+  transition: var(--transition);
+}
+
+.photo-viewer__zoom-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--gold);
+}
+
+/* ==============================================================
+   SCENE 7 — THE WAX-SEALED LETTER
    ============================================================== */
 #s-letter {
   gap: 24px;
@@ -1332,7 +1734,7 @@ textarea {
 }
 
 /* ==============================================================
-   SCENE 7 — GRAND FINALE CELEBRATION
+   SCENE 8 — GRAND FINALE CELEBRATION
    ============================================================== */
 #s-final {
   gap: 22px;
@@ -1488,6 +1890,17 @@ body.bloom::after {
 
   .countdown-box {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .balloon-tree {
+    width: 35vw;
+    opacity: 0.65;
+  }
+
+  .photo-viewer__nav {
+    width: 44px;
+    height: 44px;
+    font-size: 1.4rem;
   }
 }
 

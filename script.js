@@ -8,6 +8,7 @@ const $$ = s => [...document.querySelectorAll(s)];
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const LOW = (navigator.hardwareConcurrency || 4) <= 4;
 const MAX_LINK_LEN = 100000;
+const DRAFT_KEY = 'birthday_gift_draft_v2';
 
 // Application State
 const st = {
@@ -37,6 +38,97 @@ const fmtDate = d => {
     return d;
   }
 };
+
+/* ==============================================================
+   LOCALSTORAGE DRAFT PERSISTENCE
+   ============================================================== */
+function saveDraft() {
+  if (st.mode !== 'build') return;
+  try {
+    const draft = {
+      to: $('#f-to').value,
+      from: $('#f-from').value,
+      age: $('#f-age').value,
+      date: $('#f-date').value,
+      tone: st.tone,
+      notes: $('#f-notes').value,
+      letter: $('#f-letter').value,
+      greeting: $('#f-greeting').value,
+      signoff: $('#f-signoff').value,
+      theme: $('#f-theme').value,
+      cd: $('#f-cd').checked
+    };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    const statusEl = $('#draftStatus');
+    if (statusEl) statusEl.style.display = 'flex';
+  } catch {}
+}
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return false;
+    const draft = JSON.parse(raw);
+    if (!draft || typeof draft !== 'object') return false;
+
+    if (draft.to) $('#f-to').value = draft.to;
+    if (draft.from) $('#f-from').value = draft.from;
+    if (draft.age) $('#f-age').value = draft.age;
+    if (draft.date) $('#f-date').value = draft.date;
+    if (draft.notes) $('#f-notes').value = draft.notes;
+    if (draft.letter) $('#f-letter').value = draft.letter;
+    if (draft.greeting) $('#f-greeting').value = draft.greeting;
+    if (draft.signoff) $('#f-signoff').value = draft.signoff;
+    if (draft.cd !== undefined) $('#f-cd').checked = !!draft.cd;
+
+    if (draft.theme) {
+      $('#f-theme').value = draft.theme;
+      document.body.dataset.theme = draft.theme;
+      $$('#themePicker .theme-card').forEach(c => {
+        c.classList.toggle('active', c.dataset.theme === draft.theme);
+      });
+    }
+
+    if (draft.tone) {
+      st.tone = draft.tone;
+      $$('#toneChips .chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.tone === draft.tone);
+      });
+    }
+
+    const statusEl = $('#draftStatus');
+    if (statusEl && (draft.to || draft.from)) {
+      statusEl.style.display = 'flex';
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function clearDraft() {
+  try {
+    localStorage.removeItem(DRAFT_KEY);
+    $('#f-to').value = '';
+    $('#f-from').value = '';
+    $('#f-age').value = '';
+    $('#f-date').value = '';
+    $('#f-notes').value = '';
+    $('#f-letter').value = '';
+    $('#f-greeting').value = 'Dear Maya,';
+    $('#f-signoff').value = 'With all my love,';
+    $('#f-cd').checked = false;
+    st.photos = [];
+    renderPhotoList();
+    updateLivePreview();
+    const statusEl = $('#draftStatus');
+    if (statusEl) statusEl.style.display = 'none';
+    toast('Draft cleared! Starting fresh ✨');
+  } catch {}
+}
+
+const btnReset = $('#btnResetDraft');
+if (btnReset) btnReset.onclick = clearDraft;
 
 /* ==============================================================
    ENCODING, COMPRESSION & DATA SANITIZATION
@@ -448,6 +540,394 @@ $('#f-music').onchange = e => {
 };
 
 /* ==============================================================
+   CINEMATIC VIDEO PLAYER & CANVAS MOTION GRAPHICS
+   ============================================================== */
+const VideoPlayer = {
+  canvas: null,
+  ctx: null,
+  animId: 0,
+  currentTime: 0,
+  duration: 90, // 90 seconds (1:30)
+  isPlaying: false,
+  lastTimestamp: 0,
+  particles: [],
+
+  init() {
+    this.canvas = $('#videoCanvas');
+    if (!this.canvas) return;
+    this.ctx = this.canvas.getContext('2d');
+
+    // Create motion particles
+    this.particles = [];
+    for (let i = 0; i < 70; i++) {
+      this.particles.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        r: Math.random() * 3 + 1,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: -Math.random() * 0.8 - 0.2,
+        alpha: Math.random() * 0.7 + 0.3,
+        hue: Math.random() > 0.5 ? 42 : 335 // Gold or Rose
+      });
+    }
+
+    this.bindControls();
+    this.renderFrame(0);
+  },
+
+  bindControls() {
+    const bigPlay = $('#btnBigPlay');
+    const playPause = $('#btnVidPlayPause');
+    const poster = $('#videoPoster');
+    const timeline = $('#vidTimeline');
+    const vol = $('#vidVolume');
+    const mute = $('#btnVidMute');
+    const fs = $('#btnVidFullscreen');
+
+    const togglePlay = () => {
+      this.isPlaying ? this.pause() : this.play();
+    };
+
+    if (bigPlay) bigPlay.onclick = togglePlay;
+    if (playPause) playPause.onclick = togglePlay;
+    if (poster) {
+      poster.onclick = e => {
+        if (e.target === poster) togglePlay();
+      };
+    }
+
+    if (timeline) {
+      timeline.oninput = e => {
+        this.currentTime = parseFloat(e.target.value);
+        this.updateTimeDisplay();
+        this.renderFrame(this.currentTime);
+      };
+    }
+
+    if (vol) {
+      vol.oninput = e => {
+        const v = parseFloat(e.target.value);
+        if (AudioEngine.master) AudioEngine.master.gain.value = v;
+        if (AudioEngine.customAudio) AudioEngine.customAudio.volume = v;
+      };
+    }
+
+    if (mute) {
+      mute.onclick = () => AudioEngine.toggleMute();
+    }
+
+    if (fs) {
+      fs.onclick = () => {
+        const container = $('#videoContainer');
+        if (!document.fullscreenElement) {
+          container.requestFullscreen?.().catch(() => {});
+        } else {
+          document.exitFullscreen?.().catch(() => {});
+        }
+      };
+    }
+
+    $('#vidBtnContinue').onclick = nextScene;
+  },
+
+  play() {
+    this.isPlaying = true;
+    $('#videoPoster').classList.add('hidden');
+    $('#vidPlayIcon').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+    AudioEngine.start();
+    this.lastTimestamp = performance.now();
+    this.loop();
+  },
+
+  pause() {
+    this.isPlaying = false;
+    cancelAnimationFrame(this.animId);
+    $('#vidPlayIcon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+  },
+
+  loop() {
+    if (!this.isPlaying) return;
+    const now = performance.now();
+    const dt = (now - this.lastTimestamp) / 1000;
+    this.lastTimestamp = now;
+
+    this.currentTime += dt;
+    if (this.currentTime >= this.duration) {
+      this.currentTime = 0; // Loop film
+    }
+
+    this.updateTimeDisplay();
+    this.renderFrame(this.currentTime);
+    this.animId = requestAnimationFrame(() => this.loop());
+  },
+
+  updateTimeDisplay() {
+    const cur = Math.floor(this.currentTime);
+    const dur = Math.floor(this.duration);
+    const pad = n => String(n).padStart(2, '0');
+    $('#vidTimeline').value = this.currentTime;
+    $('#vidTimeText').textContent = `${Math.floor(cur / 60)}:${pad(cur % 60)} / ${Math.floor(dur / 60)}:${pad(dur % 60)}`;
+  },
+
+  renderFrame(time) {
+    if (!this.ctx || !this.canvas) return;
+    const c = this.ctx;
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    const toName = (st.data && st.data.to) ? st.data.to : 'Someone Special';
+
+    // Cinematic deep cosmic background
+    const bgGrad = c.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, w * 0.7);
+    bgGrad.addColorStop(0, '#2d1842');
+    bgGrad.addColorStop(0.6, '#150a22');
+    bgGrad.addColorStop(1, '#08040d');
+    c.fillStyle = bgGrad;
+    c.fillRect(0, 0, w, h);
+
+    // Drifting gold/rose particle field
+    for (const p of this.particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0) p.x = w;
+      if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h;
+      if (p.y > h) p.y = 0;
+
+      c.save();
+      c.beginPath();
+      c.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      c.fillStyle = `hsla(${p.hue}, 85%, 70%, ${p.alpha})`;
+      c.shadowColor = '#f4c978';
+      c.shadowBlur = p.r * 3;
+      c.fill();
+      c.restore();
+    }
+
+    // Rotating 3D Golden Ribbon Ring
+    const angle = time * 0.8;
+    c.save();
+    c.translate(w / 2, h / 2);
+    c.rotate(angle * 0.2);
+
+    for (let r = 140; r <= 180; r += 20) {
+      c.beginPath();
+      c.ellipse(0, 0, r * 1.5, r * 0.5, angle, 0, Math.PI * 2);
+      c.strokeStyle = 'rgba(244, 201, 120, 0.25)';
+      c.lineWidth = 1.5;
+      c.stroke();
+    }
+    c.restore();
+
+    // Central Cinematic Title Cards based on timeline phase
+    c.save();
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+
+    let titleText = `A Special Moment for ${toName}`;
+    let subText = 'Celebrating Another Beautiful Chapter of Life';
+
+    if (time >= 22 && time < 45) {
+      titleText = 'Your Kindness & Laughter';
+      subText = 'Make the World Brighter for Everyone Lucky Enough to Know You';
+    } else if (time >= 45 && time < 68) {
+      titleText = 'May All Your Dreams Take Flight';
+      subText = 'Here’s to Boundless Love, Health, and Adventure';
+    } else if (time >= 68) {
+      titleText = `Happy Birthday, ${toName}! 🎂`;
+      subText = `With Every Wish From the Heart • ${(st.data && st.data.from) ? st.data.from : ''}`;
+    }
+
+    // Title shadow and glow
+    c.font = '500 42px "Iowan Old Style", Georgia, serif';
+    c.fillStyle = '#fffdf7';
+    c.shadowColor = '#f4c978';
+    c.shadowBlur = 24;
+    c.fillText(titleText, w / 2, h / 2 - 16);
+
+    // Subtitle
+    c.font = 'italic 20px "Iowan Old Style", Georgia, serif';
+    c.fillStyle = '#f4c978';
+    c.shadowBlur = 10;
+    c.fillText(subText, w / 2, h / 2 + 32);
+
+    // Cinematic vignette border
+    const vig = c.createRadialGradient(w / 2, h / 2, h * 0.45, w / 2, h / 2, w * 0.65);
+    vig.addColorStop(0, 'rgba(0,0,0,0)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.7)');
+    c.fillStyle = vig;
+    c.fillRect(0, 0, w, h);
+
+    c.restore();
+  }
+};
+
+/* ==============================================================
+   PHOTOVIEWER (Match My Little Universe Quality)
+   ============================================================== */
+const PhotoViewer = {
+  active: false,
+  index: 0,
+  touchStartX: null,
+  zoom: 1,
+  panX: 0,
+  panY: 0,
+  isPanning: false,
+  dragStartX: 0,
+  dragStartY: 0,
+
+  open(idx) {
+    if (!st.data.photos || !st.data.photos.length) return;
+    this.index = Math.max(0, Math.min(idx, st.data.photos.length - 1));
+    this.active = true;
+    this.resetZoom();
+
+    const pv = $('#photoViewer');
+    pv.hidden = false;
+    document.body.style.overflow = 'hidden';
+
+    this.render();
+  },
+
+  close() {
+    this.active = false;
+    const pv = $('#photoViewer');
+    pv.hidden = true;
+    document.body.style.overflow = '';
+  },
+
+  next() {
+    const total = st.data.photos.length;
+    this.index = (this.index + 1) % total;
+    this.resetZoom();
+    this.render();
+  },
+
+  prev() {
+    const total = st.data.photos.length;
+    this.index = (this.index - 1 + total) % total;
+    this.resetZoom();
+    this.render();
+  },
+
+  resetZoom() {
+    this.zoom = 1;
+    this.panX = 0;
+    this.panY = 0;
+    this.applyTransform();
+  },
+
+  zoomIn() {
+    this.zoom = Math.min(3, this.zoom + 0.4);
+    this.applyTransform();
+  },
+
+  zoomOut() {
+    this.zoom = Math.max(1, this.zoom - 0.4);
+    if (this.zoom === 1) {
+      this.panX = 0;
+      this.panY = 0;
+    }
+    this.applyTransform();
+  },
+
+  applyTransform() {
+    const img = $('#pvImg');
+    if (img) {
+      img.style.transform = `scale(${this.zoom}) translate(${this.panX}px, ${this.panY}px)`;
+      img.style.cursor = this.zoom > 1 ? 'grab' : 'default';
+    }
+  },
+
+  render() {
+    const current = st.data.photos[this.index];
+    if (!current) return;
+
+    const img = $('#pvImg');
+    const cap = $('#pvCaption');
+    const fig = $('#pvFigure');
+
+    // Trigger scale-in entrance animation
+    fig.classList.remove('scale-in');
+    void fig.offsetWidth;
+    fig.classList.add('scale-in');
+
+    img.src = current.s;
+    img.alt = current.c || `Memory ${this.index + 1}`;
+    cap.textContent = current.c || '';
+
+    const showNav = st.data.photos.length > 1;
+    $('#pvPrev').style.display = showNav ? 'grid' : 'none';
+    $('#pvNext').style.display = showNav ? 'grid' : 'none';
+  },
+
+  init() {
+    const pv = $('#photoViewer');
+    if (!pv) return;
+
+    $('#pvClose').onclick = () => this.close();
+    $('#pvNext').onclick = () => this.next();
+    $('#pvPrev').onclick = () => this.prev();
+
+    $('#pvZoomIn').onclick = () => this.zoomIn();
+    $('#pvZoomOut').onclick = () => this.zoomOut();
+    $('#pvZoomReset').onclick = () => this.resetZoom();
+
+    // Close on backdrop click
+    pv.onclick = e => {
+      if (e.target === pv || e.target === $('#pvFigure') || e.target === $('#pvImgWrap')) {
+        this.close();
+      }
+    };
+
+    // Keyboard navigation (Escape, ArrowLeft, ArrowRight)
+    window.addEventListener('keydown', e => {
+      if (!this.active) return;
+      if (e.key === 'Escape') this.close();
+      if (e.key === 'ArrowRight') this.next();
+      if (e.key === 'ArrowLeft') this.prev();
+    });
+
+    // Touch Swipe gestures (delta > 50px)
+    pv.addEventListener('touchstart', e => {
+      this.touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+
+    pv.addEventListener('touchend', e => {
+      if (this.touchStartX == null || this.zoom > 1) return;
+      const deltaX = e.changedTouches[0].clientX - this.touchStartX;
+      if (Math.abs(deltaX) > 50) {
+        deltaX < 0 ? this.next() : this.prev();
+      }
+      this.touchStartX = null;
+    });
+
+    // Pan drag when zoomed in
+    const imgWrap = $('#pvImgWrap');
+    imgWrap.addEventListener('mousedown', e => {
+      if (this.zoom <= 1) return;
+      this.isPanning = true;
+      this.dragStartX = e.clientX - this.panX;
+      this.dragStartY = e.clientY - this.panY;
+      $('#pvImg').style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!this.isPanning) return;
+      this.panX = e.clientX - this.dragStartX;
+      this.panY = e.clientY - this.dragStartY;
+      this.applyTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (this.isPanning) {
+        this.isPanning = false;
+        $('#pvImg').style.cursor = this.zoom > 1 ? 'grab' : 'default';
+      }
+    });
+  }
+};
+
+/* ==============================================================
    PHOTO PROCESSING & LIVE ESTIMATION
    ============================================================== */
 function shrinkPhoto(file) {
@@ -507,6 +987,7 @@ function renderPhotoList() {
     input.oninput = () => {
       photo.c = input.value;
       updateLivePreview();
+      saveDraft();
     };
 
     const actions = document.createElement('div');
@@ -524,6 +1005,7 @@ function renderPhotoList() {
         st.photos[idx] = temp;
         renderPhotoList();
         updateLivePreview();
+        saveDraft();
       };
       actions.append(upBtn);
     }
@@ -540,6 +1022,7 @@ function renderPhotoList() {
         st.photos[idx] = temp;
         renderPhotoList();
         updateLivePreview();
+        saveDraft();
       };
       actions.append(downBtn);
     }
@@ -553,6 +1036,7 @@ function renderPhotoList() {
       st.photos.splice(idx, 1);
       renderPhotoList();
       updateLivePreview();
+      saveDraft();
     };
     actions.append(delBtn);
 
@@ -582,6 +1066,7 @@ async function handlePhotoUpload(files) {
     }
   }
   renderPhotoList();
+  saveDraft();
 }
 
 $('#f-photos').onchange = e => {
@@ -748,13 +1233,21 @@ $$('.step-tab').forEach(tab => {
 $('#f-letter').oninput = e => {
   $('#letterCount').textContent = `${e.target.value.length} / 900`;
   updateLivePreview();
+  saveDraft();
 };
 
-// Inputs live update
-['#f-to', '#f-from', '#f-age', '#f-date', '#f-notes'].forEach(sel => {
+// Inputs live update and draft save
+['#f-to', '#f-from', '#f-age', '#f-date', '#f-notes', '#f-greeting', '#f-signoff'].forEach(sel => {
   const el = $(sel);
-  if (el) el.addEventListener('input', updateLivePreview);
+  if (el) {
+    el.addEventListener('input', () => {
+      updateLivePreview();
+      saveDraft();
+    });
+  }
 });
+
+$('#f-cd').onchange = saveDraft;
 
 // Tone Inspiration Chips
 const tonePrompts = {
@@ -789,6 +1282,7 @@ $$('#toneChips .chip').forEach(chip => {
     $$('#toneChips .chip').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
     st.tone = chip.dataset.tone;
+    saveDraft();
 
     // Update inspiration prompt chips
     const prompts = tonePrompts[st.tone] || tonePrompts.warm;
@@ -808,6 +1302,7 @@ $$('#toneChips .chip').forEach(chip => {
           area.value = lines.join('\n');
           toast('Note added to balloons! 🎈');
           updateLivePreview();
+          saveDraft();
         } else {
           toast('You can have up to 6 balloon notes.');
         }
@@ -828,6 +1323,7 @@ $$('.prompt-chip').forEach(btn => {
       area.value = lines.join('\n');
       toast('Note added to balloons! 🎈');
       updateLivePreview();
+      saveDraft();
     } else {
       toast('You can have up to 6 balloon notes.');
     }
@@ -842,6 +1338,7 @@ $$('#themePicker .theme-card').forEach(card => {
     const theme = card.dataset.theme;
     $('#f-theme').value = theme;
     document.body.dataset.theme = theme;
+    saveDraft();
   };
 });
 
@@ -970,6 +1467,7 @@ function gotoScene(index) {
   const badgeMap = {
     intro: 'The Gift Box',
     count: 'Anticipation',
+    video: 'Cinematic Film',
     cake: 'Make a Wish',
     balloons: 'Whispered Wishes',
     gallery: 'Memory Album',
@@ -999,9 +1497,12 @@ function beginExperience() {
     st.stages.push('count');
   }
 
+  // Cinematic Video Player Scene
+  st.stages.push('video');
+
   // Core celebratory stages
   st.stages.push('cake');
-  if (d.notes && d.notes.length) st.stages.push('balloons');
+  st.stages.push('balloons'); // Always includes balloon bouquets & notes
   if (d.photos && d.photos.length) st.stages.push('gallery');
   if (d.letter) st.stages.push('letter');
   st.stages.push('final');
@@ -1015,6 +1516,7 @@ function beginExperience() {
 
 function returnToWorkshop() {
   AudioEngine.stop();
+  VideoPlayer.pause();
   clearInterval(st.tm);
   $('#bar').hidden = true;
   st.mode = 'build';
@@ -1082,7 +1584,15 @@ SceneHandlers.count = () => {
 };
 $('#cdBtn').onclick = nextScene;
 
-/* Scene 3: Cake & Wish Ritual */
+/* Scene 3: Cinematic Video Player Scene */
+SceneHandlers.video = () => {
+  const d = st.data;
+  words($('#videoH'), `A Special Moment for ${d.to}`);
+  $('#videoPosterTitle').textContent = `Play Birthday Film for ${d.to}`;
+  VideoPlayer.renderFrame(0);
+};
+
+/* Scene 4: Cake & Wish Ritual */
 SceneHandlers.cake = () => {
   const d = st.data;
   const candleCount = Math.max(1, Math.min(d.age || 5, 7));
@@ -1119,8 +1629,6 @@ function extinguishCandle(candleEl) {
   AudioEngine.sfx.blow();
 
   const remaining = $$('#candles .candle:not(.out)').length;
-  const total = $$('#candles .candle').length;
-
   if (remaining === 0) {
     st.ck = 1;
     $('#cakeP').textContent = 'Close your eyes and make a wish...';
@@ -1163,15 +1671,22 @@ $('#cakeBtn').onclick = () => {
   }
 };
 
-/* Scene 4: Floating Balloons */
+/* Scene 5: Floating Balloons & Balloon Trees */
 SceneHandlers.balloons = () => {
-  const notes = st.data.notes || [];
+  const notes = (st.data.notes && st.data.notes.length)
+    ? st.data.notes
+    : [
+      `You make every room warmer just by being in it.`,
+      `Still my absolute favourite person to laugh with.`,
+      `Here’s to another year of unforgettable adventures!`
+    ];
+
   const sky = $('#sky');
   sky.textContent = '';
   st.popped = 0;
 
   words($('#balH'), `Notes in the sky for ${st.data.to}`);
-  $('#balSub').textContent = 'Tap each balloon to release the secret message inside.';
+  $('#balSub').textContent = 'Tap each floating balloon to release the secret message inside.';
   $('#balBtn').hidden = true;
   $('#noteCard').textContent = 'Tap a balloon floating above to discover a secret message.';
 
@@ -1213,7 +1728,7 @@ SceneHandlers.balloons = () => {
 };
 $('#balBtn').onclick = nextScene;
 
-/* Scene 5: Memory Photo Gallery */
+/* Scene 6: Memory Photo Gallery (with PhotoViewer Integration) */
 SceneHandlers.gallery = () => {
   const slides = $('#slides');
   slides.textContent = '';
@@ -1222,6 +1737,13 @@ SceneHandlers.gallery = () => {
   st.data.photos.forEach((photo, idx) => {
     const fig = document.createElement('figure');
     fig.className = 'slide';
+    fig.setAttribute('tabindex', '0');
+    fig.setAttribute('role', 'button');
+    fig.setAttribute('aria-label', `Open full photo ${idx + 1}`);
+
+    const hint = document.createElement('span');
+    hint.className = 'slide-view-hint';
+    hint.textContent = '🔍 View full';
 
     const img = new Image();
     img.src = photo.s;
@@ -1230,7 +1752,16 @@ SceneHandlers.gallery = () => {
     const caption = document.createElement('figcaption');
     caption.textContent = photo.c || '';
 
-    fig.append(img, caption);
+    fig.append(img, hint, caption);
+
+    fig.onclick = () => PhotoViewer.open(idx);
+    fig.onkeydown = e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        PhotoViewer.open(idx);
+      }
+    };
+
     slides.append(fig);
   });
 
@@ -1244,7 +1775,7 @@ function getSlideStep() {
 }
 
 function updateSlideIndicator() {
-  const total = st.data.photos.length;
+  const total = st.data.photos ? st.data.photos.length : 0;
   if (!total) return;
   const current = Math.min(total, Math.max(1, Math.round(slidesContainer.scrollLeft / getSlideStep()) + 1));
   $('#galCount').textContent = `${current} of ${total}`;
@@ -1267,7 +1798,7 @@ $('#galPrev').onclick = () => scrollSlide(-1);
 $('#galNext').onclick = () => scrollSlide(1);
 $('#galBtn').onclick = nextScene;
 
-/* Scene 6: The Wax-Sealed Letter */
+/* Scene 7: The Wax-Sealed Letter */
 SceneHandlers.letter = () => {
   $('#env').hidden = false;
   $('#env').classList.remove('open');
@@ -1333,7 +1864,7 @@ $('#env').onkeydown = e => {
 };
 $('#letBtn').onclick = nextScene;
 
-/* Scene 7: Grand Finale Celebration */
+/* Scene 8: Grand Finale Celebration */
 SceneHandlers.final = () => {
   const d = st.data;
   const ageStr = d.age ? `${d.age}` : '';
@@ -1396,6 +1927,9 @@ $('#errMake').onclick = createNewGift;
    INITIALIZATION & HASH ROUTING
    ============================================================== */
 function initApp() {
+  VideoPlayer.init();
+  PhotoViewer.init();
+
   // Check hash format (#draft=... or legacy)
   const match = /^#draft=([\w-]+)$/.exec(location.hash);
 
@@ -1403,6 +1937,7 @@ function initApp() {
     // Creator Workshop mode
     st.mode = 'build';
     showStage('build');
+    loadDraft();
     updateStepperUI();
     updateLivePreview();
     return;
