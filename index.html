@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0d0a14">
+<meta name="theme-color" content="#FFF9F4">
 <title>A Personalized Birthday Surprise</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=DM+Serif+Display:ital@0;1&family=Lora:ital,wght@0,400..600;1,400..600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body data-theme="violet">
@@ -108,19 +108,19 @@
 
         <div class="form-grid">
           <div class="form-group">
-            <label for="f-to">Their name <small>Required</small></label>
-            <input id="f-to" maxlength="40" autocomplete="given-name" autocapitalize="words" spellcheck="false" placeholder="e.g. Maya" required aria-required="true">
+            <label for="f-to">Their name <small class="req">Required</small></label>
+            <input type="text" id="f-to" maxlength="40" autocomplete="given-name" autocapitalize="words" spellcheck="false" placeholder="e.g. Maya" required aria-required="true">
           </div>
           <div class="form-group">
-            <label for="f-from">Your name <small>Required</small></label>
-            <input id="f-from" maxlength="40" autocomplete="name" autocapitalize="words" spellcheck="false" placeholder="e.g. Sam" required aria-required="true">
+            <label for="f-from">Your name <small class="req">Required</small></label>
+            <input type="text" id="f-from" maxlength="40" autocomplete="name" autocapitalize="words" spellcheck="false" placeholder="e.g. Sam" required aria-required="true">
           </div>
           <div class="form-group">
-            <label for="f-age">Age they’re turning <small>Optional</small></label>
+            <label for="f-age">Age they’re turning <small class="opt">Optional</small></label>
             <input id="f-age" type="number" min="1" max="120" inputmode="numeric" placeholder="e.g. 25">
           </div>
           <div class="form-group">
-            <label for="f-date">Birthday date <small>Optional</small></label>
+            <label for="f-date">Birthday date <small class="opt">Optional</small></label>
             <input id="f-date" type="date">
           </div>
         </div>
@@ -154,32 +154,32 @@
           <label>Color Palette</label>
           <div class="theme-picker" id="themePicker">
             <div class="theme-card active" data-theme="violet">
-              <div class="theme-swatch" style="background: linear-gradient(135deg, #8b6cff, #ff7eb6);"></div>
-              <span class="theme-name">Burgundy</span>
+              <div class="theme-swatch" style="background: linear-gradient(135deg, #D98FA3, #EAE2F2);"></div>
+              <span class="theme-name">Dusty Rose</span>
             </div>
             <div class="theme-card" data-theme="rose">
-              <div class="theme-swatch" style="background: linear-gradient(135deg, #ff8fb1, #e8bf72);"></div>
-              <span class="theme-name">Rose Gold</span>
+              <div class="theme-swatch" style="background: linear-gradient(135deg, #E0859D, #F5D3C8);"></div>
+              <span class="theme-name">Blush Peach</span>
             </div>
             <div class="theme-card" data-theme="ocean">
-              <div class="theme-swatch" style="background: linear-gradient(135deg, #5aa7ff, #7ef0d4);"></div>
-              <span class="theme-name">Violet Dusk</span>
+              <div class="theme-swatch" style="background: linear-gradient(135deg, #9E8EC2, #DCD6EC);"></div>
+              <span class="theme-name">Soft Lavender</span>
             </div>
             <div class="theme-card" data-theme="amber">
-              <div class="theme-swatch" style="background: linear-gradient(135deg, #f7a044, #ff5b79);"></div>
-              <span class="theme-name">Golden</span>
+              <div class="theme-swatch" style="background: linear-gradient(135deg, #DCA357, #FCE6CA);"></div>
+              <span class="theme-name">Warm Honey</span>
             </div>
           </div>
           <select id="f-theme" hidden>
-            <option value="violet" selected>Burgundy night</option>
-            <option value="rose">Rose gold</option>
-            <option value="ocean">Violet dusk</option>
-            <option value="amber">Golden twilight</option>
+            <option value="violet" selected>Dusty rose</option>
+            <option value="rose">Blush peach</option>
+            <option value="ocean">Soft lavender</option>
+            <option value="amber">Warm honey</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label for="f-music">Optional custom music <small>Device preview only (built-in music plays for recipient)</small></label>
+          <label for="f-music">Optional custom music <small class="opt">Device preview only (built-in music plays for recipient)</small></label>
           <input id="f-music" type="file" accept="audio/*">
         </div>
       </div>
@@ -192,7 +192,7 @@
         </div>
 
         <div class="form-group">
-          <label>Inspiration Prompts <small>Click to paste into next empty note</small></label>
+          <label>Inspiration Prompts <small class="opt">Click to paste into next empty note</small></label>
           <div class="chips-row" id="promptChips">
             <button type="button" class="chip prompt-chip" data-prompt="You make every room warmer just by being in it.">"You make every room warmer..."</button>
             <button type="button" class="chip prompt-chip" data-prompt="Still my absolute favourite person to laugh with.">"My favourite person to laugh with..."</button>
@@ -203,27 +203,27 @@
 
         <div class="form-group">
           <label for="f-note-1">Balloon Note 1</label>
-          <input id="f-note-1" class="balloon-note-input" maxlength="90" placeholder="e.g. You make every room warmer just by being in it.">
+          <input type="text" id="f-note-1" class="balloon-note-input" maxlength="90" placeholder="e.g. You make every room warmer just by being in it.">
         </div>
 
         <div class="form-group">
           <label for="f-note-2">Balloon Note 2</label>
-          <input id="f-note-2" class="balloon-note-input" maxlength="90" placeholder="e.g. Still my absolute favourite person to laugh with.">
+          <input type="text" id="f-note-2" class="balloon-note-input" maxlength="90" placeholder="e.g. Still my absolute favourite person to laugh with.">
         </div>
 
         <div class="form-group">
           <label for="f-note-3">Balloon Note 3</label>
-          <input id="f-note-3" class="balloon-note-input" maxlength="90" placeholder="e.g. Remember that unforgettable night under the stars?">
+          <input type="text" id="f-note-3" class="balloon-note-input" maxlength="90" placeholder="e.g. Remember that unforgettable night under the stars?">
         </div>
 
         <div class="form-group">
-          <label for="f-note-4">Balloon Note 4 <small>Optional</small></label>
-          <input id="f-note-4" class="balloon-note-input" maxlength="90" placeholder="e.g. Thank you for always being my steady rock.">
+          <label for="f-note-4">Balloon Note 4 <small class="opt">Optional</small></label>
+          <input type="text" id="f-note-4" class="balloon-note-input" maxlength="90" placeholder="e.g. Thank you for always being my steady rock.">
         </div>
 
         <div class="form-group">
-          <label for="f-note-5">Balloon Note 5 <small>Optional</small></label>
-          <input id="f-note-5" class="balloon-note-input" maxlength="90" placeholder="e.g. Wishing you the most magical and joyful year yet!">
+          <label for="f-note-5">Balloon Note 5 <small class="opt">Optional</small></label>
+          <input type="text" id="f-note-5" class="balloon-note-input" maxlength="90" placeholder="e.g. Wishing you the most magical and joyful year yet!">
         </div>
 
         <textarea id="f-notes" hidden></textarea>
@@ -254,7 +254,7 @@
 
         <div class="form-group">
           <label for="f-greeting">Opening Greeting</label>
-          <input id="f-greeting" maxlength="60" placeholder="Dear Maya," value="Dear Maya,">
+          <input type="text" id="f-greeting" maxlength="60" placeholder="Dear Maya," value="Dear Maya,">
         </div>
 
         <div class="form-group">
@@ -264,7 +264,7 @@
 
         <div class="form-group">
           <label for="f-signoff">Personal Sign-off</label>
-          <input id="f-signoff" maxlength="60" placeholder="With all my love," value="With all my love,">
+          <input type="text" id="f-signoff" maxlength="60" placeholder="With all my love," value="With all my love,">
         </div>
       </div>
 

@@ -6,12 +6,13 @@ Inspired by the clean, restrained design philosophy of [ourmoments.live](https:/
 
 ---
 
-## 🌟 Visual Philosophy: Minimal by Default
+## 🌟 Visual Philosophy: Soft Romantic & Minimal
 
-- **Clean, Restrained Backdrop**: Dark midnight-plum canvas (`#0d0a14`) with subtle atmospheric warmth—avoiding oversized blurry gradient blobs, neon glow, and heavy artificial glassmorphism.
-- **Warm Champagne & Gold Accents**: Tasteful gold accents (`#e8bf72`) paired with rich plum, burgundy, and warm ivory.
-- **Refined Typography**: Editorial serif headings (`Playfair Display`, `Iowan Old Style`, Georgia) and crisp, readable sans-serif controls.
-- **Uncluttered Surfaces**: Lightweight inputs and cards with clean 1px borders, comfortable spacing, and zero unnecessary decorative noise.
+- **Soft Warm Ivory Canvas**: Warm ivory backdrop (`#FFF9F4`) paired with soft cream form surfaces (`#FFFEFC`), eliminating dark heavy backgrounds and harsh artificial neon glow.
+- **Warm Charcoal & Muted Mauve Typography**: Warm charcoal primary text (`#40343B`) and muted mauve secondary labels (`#91818D`) for effortless readability.
+- **Dusty Rose & Lavender Accents**: Delicate blush borders (`#EADDE3`) with gentle dusty rose (`#D98FA3`) and soft lavender (`#EAE2F2`) interactive accents.
+- **Editorial Typography**: Headings rendered in graceful **DM Serif Display** and **Lora**, paired with crisp, clean **DM Sans** for field labels, inputs, and controls.
+- **Balanced Two-Column Layout**: Strict two-column desktop form structure (`1fr 1fr`) with aligned labels, consistent 48px input heights, readable placeholders, and smooth mobile single-column stacking.
 
 ---
 
@@ -22,7 +23,7 @@ Inspired by the clean, restrained design philosophy of [ourmoments.live](https:/
    - Anticipation countdown toggle.
    - Celebration tone chips (*Romantic, Best Friend, Family, Playful*).
 2. **Theme & Cake**:
-   - Palette selection with compact swatch cards (*Burgundy, Rose Gold, Violet Dusk, Golden*).
+   - Palette selection with compact swatch cards (*Dusty Rose, Blush Peach, Soft Lavender, Warm Honey*).
    - Optional custom local audio upload.
 3. **Five Balloon Notes**:
    - Five dedicated numbered note inputs with quick inspiration prompt chips to easily fill in thoughtful memories and wishes.

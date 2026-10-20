@@ -747,12 +747,12 @@ const VideoPlayer = {
       subText = `With Every Wish From the Heart • ${(st.data && st.data.from) ? st.data.from : ''}`;
     }
 
-    c.font = '500 38px "Playfair Display", Georgia, serif';
-    c.fillStyle = '#f7f4fb';
+    c.font = '500 38px "DM Serif Display", "Lora", Georgia, serif';
+    c.fillStyle = '#FFF9F4';
     c.fillText(titleText, w / 2, h / 2 - 14);
 
-    c.font = 'italic 18px "Playfair Display", Georgia, serif';
-    c.fillStyle = '#e8bf72';
+    c.font = 'italic 18px "DM Serif Display", "Lora", Georgia, serif';
+    c.fillStyle = '#F5D3C8';
     c.fillText(subText, w / 2, h / 2 + 28);
 
     c.restore();
@@ -1099,10 +1099,10 @@ if (dropzone) {
    WORKSHOP STEPPER & LIVE MINI PREVIEW
    ============================================================== */
 const themeGradients = {
-  violet: 'linear-gradient(135deg, #8b6cff, #ff7eb6)',
-  rose: 'linear-gradient(135deg, #ff8fb1, #e8bf72)',
-  ocean: 'linear-gradient(135deg, #5aa7ff, #7ef0d4)',
-  amber: 'linear-gradient(135deg, #f7a044, #ff5b79)'
+  violet: 'linear-gradient(135deg, #D98FA3, #EAE2F2)',
+  rose: 'linear-gradient(135deg, #E0859D, #F5D3C8)',
+  ocean: 'linear-gradient(135deg, #9E8EC2, #DCD6EC)',
+  amber: 'linear-gradient(135deg, #DCA357, #FCE6CA)'
 };
 
 function updateLivePreview() {
@@ -1464,7 +1464,7 @@ resizeCanvas();
 
 function launchConfetti() {
   const count = RM ? 20 : LOW ? 50 : 90;
-  const colors = ['#e8bf72', '#ff8fb1', '#8b6cff', '#fff5de', '#5aa7ff'];
+  const colors = ['#D98FA3', '#EAE2F2', '#E0859D', '#FCE6CA', '#DCA357', '#FFFFFF'];
   for (let i = 0; i < count; i++) {
     particles.push({
       type: 'confetti',
@@ -1485,7 +1485,7 @@ function launchConfetti() {
 // "A Little Birthday Magic" Pointer Sparkle Trail
 function spawnMagicSparkles(x, y, count = 4) {
   if (RM) return;
-  const colors = ['#f5cf82', '#fff6d9', '#ff8fb1', '#8b6cff'];
+  const colors = ['#D98FA3', '#FCE6CA', '#EAE2F2', '#FFFFFF'];
   for (let i = 0; i < count; i++) {
     particles.push({
       type: 'sparkle',
